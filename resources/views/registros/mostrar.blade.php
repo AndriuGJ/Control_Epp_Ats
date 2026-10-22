@@ -18,8 +18,8 @@
         </section>
         <section class="tarjeta">
             <h2 class="mb-4 font-semibold">Fotografía del EPP</h2>
-            <img class="max-h-96 w-full rounded-md border border-slate-200 bg-slate-50 object-contain" src="{{ route('registros.fotografia', $registro) }}" alt="Fotografía del EPP del trabajador">
-            <p class="mt-2 text-xs text-slate-500">Recibida: {{ $registro->fecha_fotografia->format('d/m/Y H:i') }}</p>
+            <figure class="relative"><img class="max-h-96 w-full rounded-md border border-slate-200 bg-slate-50 object-contain" src="{{ route('registros.fotografia', $registro) }}" alt="Fotografía del EPP del trabajador"><figcaption class="absolute bottom-2 right-2 rounded-md bg-slate-950/80 px-3 py-2 text-xs text-white">{{ $registro->fecha_fotografia->format('d/m/Y H:i:s') }} · Perú</figcaption></figure>
+            <p class="mt-2 text-xs text-slate-500">Capturada: {{ $registro->fecha_fotografia->format('d/m/Y H:i') }}</p>
         </section>
         <section class="tarjeta">
             <h2 class="mb-4 font-semibold">Respuestas del ATS</h2>
@@ -33,8 +33,17 @@
             <h2 class="mb-4 font-semibold">Firma inicial del trabajador</h2>
             <img class="max-h-40 w-full rounded-md border border-slate-200 bg-white object-contain" src="{{ route('registros.firma', $registro) }}" alt="Firma inicial del trabajador">
         </section>
-        @if ($registro->estado === 'En curso')
-            <p class="text-sm text-slate-500">El inicio quedó guardado. El formulario de cierre de la labor se incorporará en el siguiente paso.</p>
+        @if ($registro->firma_final)
+            <section class="tarjeta">
+                <h2 class="mb-4 font-semibold">Firma final del trabajador</h2>
+                <img class="max-h-40 w-full rounded-md border border-slate-200 bg-white object-contain" src="{{ route('registros.firma-final', $registro) }}" alt="Firma final del trabajador">
+                <p class="mt-3 text-sm text-slate-600">Labor finalizada: {{ $registro->fecha_finalizacion?->format('d/m/Y H:i:s') }}</p>
+            </section>
+        @endif
+        @if ($registro->estado === 'En curso' && $registro->id_operador === auth()->id())
+            @can('registros.crear')
+                <a class="boton" href="{{ route('registros.finalizar', $registro) }}">Continuar y finalizar labor</a>
+            @endcan
         @endif
     </div>
 @endsection

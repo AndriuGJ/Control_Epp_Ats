@@ -1,4 +1,5 @@
 import './firma';
+import './camara';
 
 const selectorRol = document.querySelector('[data-selector-rol]');
 const autorizaciones = document.querySelector('[data-autorizaciones]');

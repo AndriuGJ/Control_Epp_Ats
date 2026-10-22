@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn () => route('panel'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['contrasena', 'contrasena_confirmation', 'firma_inicial']);
+        $exceptions->dontFlash(['contrasena', 'contrasena_confirmation', 'firma_inicial', 'firma_final']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

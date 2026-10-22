@@ -42,7 +42,7 @@ jobs:
           php artisan migrate --seed --force
           php artisan migrate:reset --force
           php artisan migrate --seed --force
-          php artisan test --compact tests/Feature/PreguntasAtsTest.php tests/Feature/RegistroInicialAtsTest.php
+          php artisan test --compact tests/Feature/PreguntasAtsTest.php tests/Feature/RegistroInicialAtsTest.php tests/Feature/CapturaEppTest.php tests/Feature/FinalizarRegistroAtsTest.php
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1

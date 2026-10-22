@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class IniciarRegistroAtsRequest extends FormRequest
 {
@@ -15,10 +16,11 @@ class IniciarRegistroAtsRequest extends FormRequest
     {
         return [
             'id_maquina' => ['required', 'integer'],
-            'fotografia_epp' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'captura_epp' => ['required', 'uuid'],
+            'fotografia_epp' => ['prohibited'],
             'firma_inicial' => ['required', 'string', 'max:300000'],
             'respuestas' => ['required', 'array', 'min:1', 'max:100'],
-            'respuestas.*' => ['required', 'string', 'max:2000'],
+            'respuestas.*' => ['required', Rule::in(['Sí', 'No'])],
             'version_preguntas' => ['required', 'string', 'size:64'],
         ];
     }
@@ -26,18 +28,16 @@ class IniciarRegistroAtsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'fotografia_epp.required' => 'Adjunta una fotografía usando tu EPP.',
-            'fotografia_epp.image' => 'La fotografía del EPP debe ser una imagen válida.',
-            'fotografia_epp.mimes' => 'La fotografía debe estar en formato JPG, PNG o WEBP.',
-            'fotografia_epp.max' => 'La fotografía no debe superar los 4 MB.',
-            'fotografia_epp.uploaded' => 'No se pudo subir la fotografía. Revisa el tamaño del archivo.',
             'firma_inicial.required' => 'Dibuja tu firma antes de iniciar el registro.',
             'firma_inicial.max' => 'La imagen de la firma es demasiado grande. Limpia el recuadro y vuelve a firmar.',
             'respuestas.required' => 'Responde las preguntas iniciales del ATS.',
             'respuestas.min' => 'Responde las preguntas iniciales del ATS.',
             'respuestas.max' => 'El formulario admite hasta 100 preguntas iniciales.',
             'respuestas.*.required' => 'Debes responder todas las preguntas iniciales.',
-            'respuestas.*.max' => 'Cada respuesta admite como máximo 2000 caracteres.',
+            'respuestas.*.in' => 'Selecciona únicamente Sí o No en cada pregunta.',
+            'captura_epp.required' => 'Toma tu fotografía con la cámara antes de iniciar el registro.',
+            'captura_epp.uuid' => 'Vuelve a tomar la fotografía con la cámara.',
+            'fotografia_epp.prohibited' => 'Usa la cámara del formulario para tomar la fotografía.',
             'version_preguntas.required' => 'Recarga el formulario antes de iniciar el registro.',
             'version_preguntas.size' => 'Recarga el formulario antes de iniciar el registro.',
         ];

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FinalizarRegistroAtsRequest;
 use App\Http\Requests\IniciarRegistroAtsRequest;
+use App\Services\CapturaEppService;
 use App\Services\RegistroAtsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,9 +31,12 @@ class RegistroAtsController extends Controller
         return view('registros.iniciar', $this->servicio->prepararInicio($request->user()));
     }
 
-    public function store(IniciarRegistroAtsRequest $request): RedirectResponse
+    public function store(IniciarRegistroAtsRequest $request, CapturaEppService $capturas): RedirectResponse
     {
-        $registro = $this->servicio->iniciar($request->user(), $request->validated());
+        $captura = $request->session()->get('ats.captura');
+        $registro = $this->servicio->iniciar($request->user(), $request->validated(), $captura);
+        $request->session()->forget('ats.captura');
+        $capturas->descartar($captura);
 
         return to_route('registros.show', $registro)->with('estado', 'Registro iniciado correctamente.');
     }
@@ -49,6 +54,28 @@ class RegistroAtsController extends Controller
     public function firma(Request $request, int $registro): StreamedResponse
     {
         return $this->archivo($request, $registro, 'firma_inicial');
+    }
+
+    public function finalizar(Request $request, int $registro): View|RedirectResponse
+    {
+        $datos = $this->servicio->prepararFinalizacion($request->user(), $registro);
+        if ($datos['registro']->estado !== 'En curso') {
+            return to_route('registros.show', $registro)->with('estado', 'Este registro ya está finalizado.');
+        }
+
+        return view('registros.finalizar', $datos);
+    }
+
+    public function guardarFinalizacion(FinalizarRegistroAtsRequest $request, int $registro): RedirectResponse
+    {
+        $registroFinalizado = $this->servicio->finalizar($request->user(), $registro, $request->validated());
+
+        return to_route('registros.show', $registroFinalizado)->with('estado', 'Labor finalizada correctamente.');
+    }
+
+    public function firmaFinal(Request $request, int $registro): StreamedResponse
+    {
+        return $this->archivo($request, $registro, 'firma_final');
     }
 
     private function archivo(Request $request, int $id, string $campo): StreamedResponse
