@@ -1,58 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Control de EPP y ATS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web para el área de Logística de Makro, desarrollado desde TID. Los datos del proceso se organizan en español y conservan la separación entre operador y supervisor revisor.
 
-## About Laravel
+## Primera entrega
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Acceso por correo y contraseña, cierre de sesión, cuentas activas y límite de intentos.
+- Roles de administrador, supervisor y operador mediante Spatie Laravel Permission.
+- Registro y edición de usuarios y máquinas, con activación y desactivación.
+- Asignación y retiro de máquinas autorizadas por operador.
+- Panel inicial con registros del usuario y máquinas activas autorizadas.
+- Migraciones, modelos y relaciones de `usuarios`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Esta entrega prepara los datos para las etapas inicial y final del ATS y su revisión. La captura de fotografía y firmas, el llenado del ATS, la revisión y los reportes PDF todavía no tienen pantallas ni acciones de registro.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requisitos
 
-## Learning Laravel
+PHP 8.5 con las extensiones habituales de Laravel y PDO MySQL, Composer, Node.js 22.12 o superior y MySQL 8.0 o superior. Para ejecutar las pruebas también se necesita PDO SQLite. Las versiones exactas de los paquetes se encuentran en los archivos de bloqueo de Composer y npm.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalación local
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm ci
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Crear una base de datos MySQL llamada `control_epp_ats`. Configurar en `.env` el servidor, puerto, nombre de la base, usuario y contraseña propios:
 
-## Contributing
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=control_epp_ats
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_contrasena
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Después:
 
-## Code of Conduct
+```bash
+php artisan migrate --seed
+php artisan app:crear-administrador
+npm run build
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+El comando solicita los datos y una contraseña elegida por el responsable, sin crear credenciales predeterminadas. Para trabajar los estilos durante el desarrollo, ejecutar `npm run dev` en otra terminal en lugar de compilar después de cada cambio. El punto de entrada de acceso es `/ingresar`.
 
-## Security Vulnerabilities
+## Uso de esta entrega
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Ingresar con el administrador creado por consola.
+2. Registrar las máquinas en el catálogo.
+3. Crear usuarios, asignar un rol y marcar las máquinas autorizadas si son operadores.
+4. Ingresar con un operador y comprobar sus equipos disponibles en el panel.
 
-## License
+Las cuentas y máquinas se desactivan para mantener el historial. Las fotografías y firmas del futuro flujo ATS se conservarán como archivos privados; la base de datos almacenará las rutas. La tabla de autorizaciones evita duplicados y las respuestas tienen una restricción única por registro y pregunta.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Las tablas de soporte de Spatie están configuradas como `roles`, `permisos`, `usuarios_roles`, `usuarios_permisos` y `roles_permisos`. Los campos internos exigidos por ese paquete mantienen sus nombres originales para asegurar su compatibilidad. Las tablas técnicas de sesión, caché y cola que incluye Laravel también son de soporte; el entorno de ejemplo utiliza sesiones y caché en archivos y ejecución de cola síncrona.
+
+## Verificación
+
+```bash
+php artisan test --compact
+vendor/bin/pint --dirty --format agent
+npm run build
+```
+
+Las pruebas usan una base SQLite en memoria y no modifican la base configurada para el uso normal de la aplicación. El flujo de integración continua también verifica la instalación de las migraciones y los roles en MySQL.
