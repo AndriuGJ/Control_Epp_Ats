@@ -30,6 +30,10 @@
                 <a class="enlace-menu {{ request()->routeIs('maquinas.*') ? 'enlace-menu-activo' : '' }}"
                     href="{{ route('maquinas.index') }}">Máquinas</a>
             @endcan
+            @can('reportes.generar')
+                <a class="enlace-menu {{ request()->routeIs('reportes.*') ? 'enlace-menu-activo' : '' }}"
+                    href="{{ route('reportes.index') }}">Reportes</a>
+            @endcan
         </nav>
         <p class="absolute bottom-7 hidden text-xs leading-5 text-slate-500 lg:block">
             Registro individual.<br>Información organizada.

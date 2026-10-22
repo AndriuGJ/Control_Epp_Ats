@@ -1,7 +1,10 @@
 @import 'tailwindcss';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@theme { --font-sans: ui-sans-serif, system-ui, sans-serif; }
+@theme {
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --radius-md: 0.125rem;
+}
 @layer base {
     body { @apply bg-slate-50 text-slate-800 antialiased; }
     button, a, input, select, textarea { @apply focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600; }

@@ -7,6 +7,8 @@ Sistema web para el área de Logística de Makro, desarrollado desde TID. Los da
 - Acceso por correo y contraseña, cierre de sesión, cuentas activas y límite de intentos.
 - Roles de administrador, supervisor y operador mediante Spatie Laravel Permission.
 - Registro y edición de usuarios y máquinas, con activación y desactivación.
+- Carga opcional y reemplazo de fotografías de máquinas, con miniaturas en el catálogo.
+- Acceso a la vista inicial de Reportes para administrador y supervisor; su generación está pendiente.
 - Asignación y retiro de máquinas autorizadas por operador.
 - Panel inicial con registros del usuario y máquinas activas autorizadas.
 - Migraciones, modelos y relaciones de `users`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
@@ -62,6 +64,8 @@ Esta reorganización modifica las migraciones iniciales de una aplicación en de
 2. Registrar las máquinas en el catálogo.
 3. Crear usuarios, asignar un rol y marcar las máquinas autorizadas si son operadores.
 4. Ingresar con un operador y comprobar sus equipos disponibles en el panel.
+
+Las fotografías de máquinas admiten JPG, PNG y WEBP de hasta 4 MB. Se guardan en almacenamiento privado y se muestran mediante una ruta protegida con el permiso de gestión de máquinas; no requieren `storage:link`. Para admitir archivos de 4 MB, PHP debe tener `upload_max_filesize` de al menos `4M` y `post_max_size` de al menos `8M`. Al editar sin elegir una imagen, se conserva la anterior; al reemplazarla se elimina el archivo anterior después de guardar correctamente.
 
 Las cuentas y máquinas se desactivan para mantener el historial. Las fotografías y firmas del futuro flujo ATS se conservarán como archivos privados; la base de datos almacenará las rutas. La tabla de autorizaciones evita duplicados y las respuestas tienen una restricción única por registro y pregunta.
 
