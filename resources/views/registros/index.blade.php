@@ -6,13 +6,13 @@
     <div class="mb-7 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-semibold">Registros ATS/EPP</h1>
-            <p class="mt-2 text-sm text-slate-500">Consulta la información guardada al iniciar la labor.</p>
+            <p class="mt-2 text-sm text-neutral-500">Consulta la información guardada al iniciar la labor.</p>
         </div>
         @can('registros.crear')
             <a class="boton" href="{{ route('registros.create') }}">@include('partials.icono', ['nombre' => 'agregar']) Iniciar registro</a>
         @endcan
     </div>
-    <div class="overflow-x-auto rounded-md border border-slate-200 bg-white">
+    <div class="overflow-x-auto rounded-md border border-neutral-200 bg-white">
         <table class="tabla">
             <thead><tr><th>Registro</th><th>Trabajador</th><th>Máquina</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
@@ -23,10 +23,10 @@
                         <td>{{ $registro->maquina->nombre }}</td>
                         <td>{{ $registro->fecha_inicio->format('d/m/Y H:i') }}</td>
                         <td><span class="insignia">{{ $registro->estado }}</span></td>
-                        <td><a class="text-teal-700 hover:underline" href="{{ route('registros.show', $registro) }}">Ver registro</a></td>
+                        <td><a class="text-principal hover:underline" href="{{ route('registros.show', $registro) }}">Ver registro</a></td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="py-10 text-center text-slate-500">Todavía no hay registros para mostrar.</td></tr>
+                    <tr><td colspan="6" class="py-10 text-center text-neutral-500">Todavía no hay registros para mostrar.</td></tr>
                 @endforelse
             </tbody>
         </table>

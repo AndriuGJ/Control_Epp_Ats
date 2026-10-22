@@ -4,7 +4,7 @@
 
 @section('contenido')
     <div class="mb-7">
-        <a class="inline-flex items-center gap-2 text-sm text-teal-700 hover:underline" href="{{ route('preguntas.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a preguntas</a>
+        <a class="inline-flex items-center gap-2 text-sm text-principal hover:underline" href="{{ route('preguntas.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a preguntas</a>
         <h1 class="mt-4 text-2xl font-semibold">{{ $pregunta->exists ? 'Editar pregunta ATS' : 'Registrar pregunta ATS' }}</h1>
     </div>
     <form method="POST" action="{{ $pregunta->exists ? route('preguntas.update', $pregunta) : route('preguntas.store') }}" class="tarjeta max-w-2xl space-y-5">
@@ -15,7 +15,7 @@
         <div>
             <label class="etiqueta" for="pregunta">Pregunta</label>
             <textarea class="campo" id="pregunta" name="pregunta" rows="3" maxlength="255" required>{{ old('pregunta', $pregunta->pregunta) }}</textarea>
-            <p class="mt-2 text-xs text-slate-500">Si ya fue respondida, conserva su texto y etapa. Puedes desactivarla y registrar una nueva.</p>
+            <p class="mt-2 text-xs text-neutral-500">Si ya fue respondida, conserva su texto y etapa. Puedes desactivarla y registrar una nueva.</p>
         </div>
         <div class="grid gap-5 sm:grid-cols-3">
             <div>

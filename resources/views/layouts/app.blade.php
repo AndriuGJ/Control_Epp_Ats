@@ -8,26 +8,26 @@
 </head>
 <body class="min-h-screen">
     <button type="button" data-fondo-menu data-cerrar-menu hidden tabindex="-1"
-        class="fixed inset-0 z-40 cursor-pointer bg-slate-950/50 lg:hidden"
+        class="fixed inset-0 z-40 cursor-pointer bg-neutral-950/50 lg:hidden"
         aria-label="Cerrar menú"></button>
 
     <aside id="menu-lateral" aria-label="Menú principal"
-        class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100%-3rem)] -translate-x-full flex-col overflow-y-auto bg-slate-950 p-5 transition-transform motion-reduce:transition-none lg:w-64 lg:translate-x-0 lg:p-7">
+        class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100%-3rem)] -translate-x-full flex-col overflow-y-auto border-r border-neutral-200 bg-white p-5 transition-transform motion-reduce:transition-none lg:w-64 lg:translate-x-0 lg:p-7">
         <div class="flex items-center justify-between gap-2">
-            <a href="{{ route('panel') }}" class="flex min-w-0 items-center gap-3 text-white">
-                <span class="grid size-10 shrink-0 place-items-center rounded-md bg-teal-600 text-sm font-bold">E/A</span>
+            <a href="{{ route('panel') }}" class="flex min-w-0 items-center gap-3 text-principal">
+                <span class="grid size-10 shrink-0 place-items-center rounded-md bg-principal text-sm font-bold text-white">E/A</span>
                 <span class="text-sm font-semibold">
                     Control EPP y ATS
-                    <span class="mt-0.5 block text-xs font-normal text-slate-400">Logística · Makro</span>
+                    <span class="mt-0.5 block text-xs font-normal text-neutral-500">Logística · Makro</span>
                 </span>
             </a>
             <button type="button" data-cerrar-menu aria-label="Cerrar menú"
-                class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md p-2 text-slate-300 hover:bg-white/10 hover:text-white lg:hidden">
+                class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md p-2 text-neutral-600 hover:bg-neutral-100 hover:text-principal lg:hidden">
                 @include('partials.icono', ['nombre' => 'cerrar'])
             </button>
         </div>
 
-        <p class="mt-9 text-xs font-semibold uppercase tracking-widest text-slate-500">Espacio de trabajo</p>
+        <p class="mt-9 text-xs font-semibold uppercase tracking-widest text-neutral-500">Espacio de trabajo</p>
         <nav aria-label="Navegación principal" class="mt-5 flex flex-col gap-2">
             <a class="enlace-menu {{ request()->routeIs('panel') ? 'enlace-menu-activo' : '' }}"
                 href="{{ route('panel') }}">
@@ -68,28 +68,28 @@
                 </a>
             @endcan
         </nav>
-        <p class="mt-auto pt-8 text-xs leading-5 text-slate-500">
+        <p class="mt-auto pt-8 text-xs leading-5 text-neutral-500">
             Registro individual.<br>Información organizada.
         </p>
     </aside>
 
     <div data-contenido-app class="lg:pl-64">
-        <header class="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-10">
+        <header class="flex items-center justify-between gap-3 border-b border-neutral-200 bg-white px-4 py-4 sm:px-6 lg:px-10">
             <div class="flex min-w-0 items-center gap-3">
                 <button type="button" data-abrir-menu aria-controls="menu-lateral"
                     aria-expanded="false" aria-label="Abrir menú"
-                    class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 lg:hidden">
+                    class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-neutral-300 bg-white p-2 text-neutral-700 hover:bg-neutral-100 lg:hidden">
                     @include('partials.icono', ['nombre' => 'menu'])
                 </button>
                 <div class="min-w-0">
-                    <p class="hidden text-xs uppercase tracking-widest text-slate-400 sm:block">Control de seguridad</p>
+                    <p class="hidden text-xs uppercase tracking-widest text-neutral-400 sm:block">Control de seguridad</p>
                     <p class="truncate text-sm font-medium sm:mt-1">@yield('titulo', 'Panel de control')</p>
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-4">
                 <div class="hidden text-right sm:block">
                     <p class="text-sm font-semibold">{{ auth()->user()->nombres }} {{ auth()->user()->apellidos }}</p>
-                    <p class="mt-0.5 text-xs capitalize text-slate-500">{{ auth()->user()->getRoleNames()->implode(', ') }}</p>
+                    <p class="mt-0.5 text-xs capitalize text-neutral-500">{{ auth()->user()->getRoleNames()->implode(', ') }}</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
