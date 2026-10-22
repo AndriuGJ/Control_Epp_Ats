@@ -70,5 +70,5 @@ it('puede ejecutar el seeder de roles más de una vez sin duplicar', function ()
     $this->seed(RolesPermisosSeeder::class);
     $this->seed(RolesPermisosSeeder::class);
     $this->assertDatabaseCount('roles', 3);
-    $this->assertDatabaseCount('permisos', 7);
+    $this->assertDatabaseCount('permisos', 8);
 });

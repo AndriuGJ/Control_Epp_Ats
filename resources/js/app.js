@@ -1,3 +1,5 @@
+import './firma';
+
 const selectorRol = document.querySelector('[data-selector-rol]');
 const autorizaciones = document.querySelector('[data-autorizaciones]');
 if (selectorRol && autorizaciones) {

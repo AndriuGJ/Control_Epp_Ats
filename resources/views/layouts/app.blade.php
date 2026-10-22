@@ -34,6 +34,18 @@
                 @include('partials.icono', ['nombre' => 'panel'])
                 <span>Panel de control</span>
             </a>
+            @can('registros.consultar')
+                <a class="enlace-menu {{ request()->routeIs('registros.*') ? 'enlace-menu-activo' : '' }}" href="{{ route('registros.index') }}">
+                    @include('partials.icono', ['nombre' => 'reportes'])
+                    <span>Registros ATS/EPP</span>
+                </a>
+            @endcan
+            @can('preguntas.gestionar')
+                <a class="enlace-menu {{ request()->routeIs('preguntas.*') ? 'enlace-menu-activo' : '' }}" href="{{ route('preguntas.index') }}">
+                    @include('partials.icono', ['nombre' => 'editar'])
+                    <span>Preguntas del ATS</span>
+                </a>
+            @endcan
             @can('usuarios.gestionar')
                 <a class="enlace-menu {{ request()->routeIs('usuarios.*') ? 'enlace-menu-activo' : '' }}"
                     href="{{ route('usuarios.index') }}">

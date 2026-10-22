@@ -12,7 +12,7 @@ class RolesPermisosSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $permisos = ['usuarios.gestionar', 'maquinas.gestionar', 'autorizaciones.gestionar', 'registros.crear', 'registros.consultar', 'registros.revisar', 'reportes.generar'];
+        $permisos = ['usuarios.gestionar', 'maquinas.gestionar', 'autorizaciones.gestionar', 'preguntas.gestionar', 'registros.crear', 'registros.consultar', 'registros.revisar', 'reportes.generar'];
         foreach ($permisos as $permiso) {
             Permission::findOrCreate($permiso, 'web');
         }
