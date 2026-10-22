@@ -1,4 +1,8 @@
-<x-layout :titulo="$usuario->exists ? 'Editar usuario' : 'Registrar usuario'">
+@extends('layouts.app')
+
+@section('titulo', $usuario->exists ? 'Editar usuario' : 'Registrar usuario')
+
+@section('contenido')
     <div class="mb-7"><a class="text-sm text-teal-700 hover:underline" href="{{ route('usuarios.index') }}">← Volver a usuarios</a><h1 class="mt-4 text-2xl font-semibold">{{ $usuario->exists ? 'Editar usuario' : 'Registrar usuario' }}</h1></div>
     <form method="POST" action="{{ $usuario->exists ? route('usuarios.update', $usuario) : route('usuarios.store') }}" class="tarjeta max-w-4xl">
         @csrf @if ($usuario->exists) @method('PUT') @endif
@@ -12,7 +16,7 @@
             <div><label class="etiqueta" for="rol">Rol</label><select class="campo" name="rol" id="rol" data-selector-rol>@foreach (['operador', 'supervisor', 'administrador'] as $rol)<option value="{{ $rol }}" @selected(old('rol', $usuario->roles->first()?->name ?? 'operador') === $rol)>{{ ucfirst($rol) }}</option>@endforeach</select></div>
             <div><label class="etiqueta" for="estado">Estado</label><select class="campo" name="estado" id="estado"><option value="1" @selected((string) old('estado', (int) $usuario->estado) === '1')>Activo</option><option value="0" @selected((string) old('estado', (int) $usuario->estado) === '0')>Inactivo</option></select></div>
         </div>
-        <fieldset class="mt-8 border-t border-slate-200 pt-6" data-autorizaciones><legend class="px-1 font-semibold">Máquinas autorizadas</legend><p class="mb-4 mt-2 text-sm text-slate-500">Selecciona los equipos que podrá utilizar el operador.</p><div class="grid gap-3 sm:grid-cols-2">@forelse ($maquinas as $maquina)<label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4"><input class="mt-1 size-4 accent-teal-700" type="checkbox" name="maquinas[]" value="{{ $maquina->id_maquina }}" @checked(in_array($maquina->id_maquina, old('maquinas', $usuario->maquinas->modelKeys())))><span class="text-sm">{{ $maquina->nombre }}@if (! $maquina->estado)<span class="block text-xs text-slate-500">Inactiva</span>@endif</span></label>@empty<p class="text-sm text-slate-500">Registra las máquinas antes de asignar autorizaciones.</p>@endforelse</div></fieldset>
+        <fieldset class="mt-8 border-t border-slate-200 pt-6" data-autorizaciones><legend class="px-1 font-semibold">Máquinas autorizadas</legend><p class="mb-4 mt-2 text-sm text-slate-500">Selecciona los equipos que podrá utilizar el operador.</p><div class="grid gap-3 sm:grid-cols-2">@forelse ($maquinas as $maquina)<label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-4"><input class="mt-1 size-4 accent-teal-700" type="checkbox" name="maquinas[]" value="{{ $maquina->id_maquina }}" @checked(in_array($maquina->id_maquina, old('maquinas', $usuario->maquinas->modelKeys())))><span class="text-sm">{{ $maquina->nombre }}@if (! $maquina->estado)<span class="block text-xs text-slate-500">Inactiva</span>@endif</span></label>@empty<p class="text-sm text-slate-500">Registra las máquinas antes de asignar autorizaciones.</p>@endforelse</div></fieldset>
         <div class="mt-8 flex flex-wrap gap-3"><button class="boton" type="submit">Guardar usuario</button><a class="boton-secundario" href="{{ route('usuarios.index') }}">Cancelar</a></div>
     </form>
-</x-layout>
+@endsection
