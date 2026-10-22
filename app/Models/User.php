@@ -19,14 +19,6 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
-    public const CREATED_AT = 'creado_en';
-
-    public const UPDATED_AT = 'actualizado_en';
-
-    protected $table = 'usuarios';
-
-    protected $primaryKey = 'id_usuario';
-
     protected $authPasswordName = 'contrasena';
 
     protected $rememberTokenName = 'token_recuerdo';
@@ -40,7 +32,7 @@ class User extends Authenticatable
 
     public function maquinas(): BelongsToMany
     {
-        return $this->belongsToMany(Maquina::class, 'usuarios_maquinas', 'id_usuario', 'id_maquina');
+        return $this->belongsToMany(Maquina::class, 'usuarios_maquinas', 'id_usuario', 'id_maquina')->withTimestamps();
     }
 
     public function registros(): HasMany

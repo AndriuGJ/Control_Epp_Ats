@@ -25,8 +25,8 @@ class GuardarUsuarioRequest extends FormRequest
         return [
             'nombres' => ['required', 'string', 'max:100'],
             'apellidos' => ['required', 'string', 'max:100'],
-            'dni' => ['required', 'digits:8', Rule::unique('usuarios', 'dni')->ignore($this->route('usuario'))],
-            'correo' => ['required', 'email', 'max:255', Rule::unique('usuarios', 'correo')->ignore($this->route('usuario'))],
+            'dni' => ['required', 'digits:8', Rule::unique('users', 'dni')->ignore($this->route('usuario'))],
+            'correo' => ['required', 'email', 'max:255', Rule::unique('users', 'correo')->ignore($this->route('usuario'))],
             'contrasena' => [$this->isMethod('post') ? 'required' : 'nullable', 'confirmed', Password::min(12)->letters()->numbers()],
             'estado' => ['required', 'boolean'],
             'rol' => ['required', Rule::in(['administrador', 'supervisor', 'operador'])],

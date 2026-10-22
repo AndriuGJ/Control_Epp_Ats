@@ -24,7 +24,7 @@ class CrearAdministrador extends Command
         ];
         $validacion = Validator::make($datos, [
             'nombres' => ['required', 'string', 'max:100'], 'apellidos' => ['required', 'string', 'max:100'],
-            'dni' => ['required', 'digits:8', 'unique:usuarios,dni'], 'correo' => ['required', 'email', 'max:255', 'unique:usuarios,correo'],
+            'dni' => ['required', 'digits:8', 'unique:users,dni'], 'correo' => ['required', 'email', 'max:255', 'unique:users,correo'],
             'contrasena' => ['required', 'confirmed', Password::min(12)->letters()->numbers()],
         ]);
         if ($validacion->fails()) {

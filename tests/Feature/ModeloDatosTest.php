@@ -8,8 +8,35 @@ use App\Models\User;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
+it('guarda los trabajadores en users y registra las fechas estándar del proceso', function (): void {
+    $this->freezeTime();
+    $operador = User::factory()->create();
+    $maquina = Maquina::factory()->create();
+    $pregunta = PreguntaAts::factory()->create();
+    $registro = RegistroAtsEpp::factory()->create(['id_operador' => $operador->id, 'id_maquina' => $maquina->getKey()]);
+    $respuesta = RespuestaAts::factory()->create(['id_registro' => $registro->getKey(), 'id_pregunta' => $pregunta->getKey()]);
+    $operador->maquinas()->attach($maquina);
+
+    expect(Schema::hasTable('usuarios'))->toBeFalse();
+    $this->assertDatabaseHas('users', ['id' => $operador->id, 'correo' => $operador->correo]);
+    foreach ([$operador, $maquina, $pregunta, $registro, $respuesta] as $modelo) {
+        $this->assertDatabaseHas($modelo->getTable(), [
+            $modelo->getKeyName() => $modelo->getKey(),
+            'created_at' => now()->toDateTimeString(),
+            'updated_at' => now()->toDateTimeString(),
+        ]);
+    }
+    $this->assertDatabaseHas('usuarios_maquinas', [
+        'id_usuario' => $operador->id,
+        'id_maquina' => $maquina->getKey(),
+        'created_at' => now()->toDateTimeString(),
+        'updated_at' => now()->toDateTimeString(),
+    ]);
+});
+
 it('distingue al operador y al revisor del mismo registro', function (): void {
     $operador = User::factory()->create();
     $revisor = User::factory()->create();

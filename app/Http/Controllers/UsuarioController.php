@@ -14,7 +14,7 @@ class UsuarioController extends Controller
 {
     public function index(): View
     {
-        return view('usuarios.index', ['usuarios' => User::with('roles')->orderBy('apellidos')->orderBy('id_usuario')->paginate(15)]);
+        return view('usuarios.index', ['usuarios' => User::with('roles')->orderBy('apellidos')->orderBy('id')->paginate(15)]);
     }
 
     public function create(): View

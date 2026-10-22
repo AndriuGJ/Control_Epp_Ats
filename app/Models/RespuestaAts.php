@@ -14,10 +14,6 @@ class RespuestaAts extends Model
     /** @use HasFactory<RespuestaAtsFactory> */
     use HasFactory;
 
-    public const CREATED_AT = 'creado_en';
-
-    public const UPDATED_AT = 'actualizado_en';
-
     protected $table = 'respuestas_ats';
 
     protected $primaryKey = 'id_respuesta';

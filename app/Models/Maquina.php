@@ -15,10 +15,6 @@ class Maquina extends Model
     /** @use HasFactory<MaquinaFactory> */
     use HasFactory;
 
-    public const CREATED_AT = 'creado_en';
-
-    public const UPDATED_AT = 'actualizado_en';
-
     protected $table = 'maquinas';
 
     protected $primaryKey = 'id_maquina';
@@ -30,7 +26,7 @@ class Maquina extends Model
 
     public function operadores(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'usuarios_maquinas', 'id_maquina', 'id_usuario');
+        return $this->belongsToMany(User::class, 'usuarios_maquinas', 'id_maquina', 'id_usuario')->withTimestamps();
     }
 
     public function registros(): HasMany

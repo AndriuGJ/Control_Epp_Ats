@@ -15,10 +15,6 @@ class RegistroAtsEpp extends Model
     /** @use HasFactory<RegistroAtsEppFactory> */
     use HasFactory;
 
-    public const CREATED_AT = 'creado_en';
-
-    public const UPDATED_AT = 'actualizado_en';
-
     protected $table = 'registros_ats_epp';
 
     protected $primaryKey = 'id_registro';

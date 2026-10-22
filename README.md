@@ -9,7 +9,7 @@ Sistema web para el área de Logística de Makro, desarrollado desde TID. Los da
 - Registro y edición de usuarios y máquinas, con activación y desactivación.
 - Asignación y retiro de máquinas autorizadas por operador.
 - Panel inicial con registros del usuario y máquinas activas autorizadas.
-- Migraciones, modelos y relaciones de `usuarios`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
+- Migraciones, modelos y relaciones de `users`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
 
 Esta entrega prepara los datos para las etapas inicial y final del ATS y su revisión. La captura de fotografía y firmas, el llenado del ATS, la revisión y los reportes PDF todavía no tienen pantallas ni acciones de registro.
 
@@ -47,6 +47,14 @@ php artisan serve
 ```
 
 El comando solicita los datos y una contraseña elegida por el responsable, sin crear credenciales predeterminadas. Para trabajar los estilos durante el desarrollo, ejecutar `npm run dev` en otra terminal en lugar de compilar después de cada cambio. El punto de entrada de acceso es `/ingresar`.
+
+## Migraciones
+
+Cada tabla del proceso tiene su propio archivo de migración: `maquinas`, `usuarios_maquinas`, `preguntas_ats`, `registros_ats_epp` y `respuestas_ats`. Los trabajadores utilizan únicamente la tabla `users` de Laravel, adaptada con sus datos en español y su clave primaria `id`. No se crea una tabla `usuarios`. Los modelos utilizan `created_at` y `updated_at`; la tabla intermedia de autorizaciones también los registra.
+
+La migración original de Laravel conserva sus tablas técnicas y la migración publicada de Spatie conserva la estructura del paquete.
+
+Esta reorganización modifica las migraciones iniciales de una aplicación en desarrollo. Si ya ejecutaste la versión anterior, `php artisan migrate` no convierte esa base automáticamente. Para una base local que contenga únicamente datos de prueba que puedas descartar, puedes reconstruirla con `php artisan migrate:fresh --seed` y volver a ejecutar `php artisan app:crear-administrador`. El primer comando elimina todas las tablas y sus datos; no debe ejecutarse sobre una base con información que necesites conservar.
 
 ## Uso de esta entrega
 
