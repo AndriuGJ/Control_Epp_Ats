@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-semibold">Máquinas</h1>
             <p class="mt-2 text-sm text-slate-500">Catálogo de equipos del área de Logística.</p>
         </div>
-        <a href="{{ route('maquinas.create') }}" class="boton">+ Registrar máquina</a>
+        <a href="{{ route('maquinas.create') }}" class="boton">@include('partials.icono', ['nombre' => 'agregar']) Registrar máquina</a>
     </div>
 
     <div class="overflow-x-auto rounded-md border border-slate-200 bg-white">
@@ -40,7 +40,7 @@
                         </td>
                         <td>{{ $maquina->operadores_count }}</td>
                         <td><span class="insignia">{{ $maquina->estado ? 'Activa' : 'Inactiva' }}</span></td>
-                        <td><a class="font-medium text-teal-700 hover:underline" href="{{ route('maquinas.edit', $maquina) }}">Editar</a></td>
+                        <td><a class="inline-flex items-center gap-2 font-medium text-teal-700 hover:underline" href="{{ route('maquinas.edit', $maquina) }}">@include('partials.icono', ['nombre' => 'editar']) Editar</a></td>
                     </tr>
                 @empty
                     <tr><td colspan="5" class="py-10 text-center text-slate-500">Aún no hay máquinas. Registra el primer equipo para comenzar.</td></tr>

@@ -34,7 +34,7 @@
                 Mantener mi sesión iniciada
             </label>
 
-            <button type="submit" class="boton w-full">Ingresar al sistema</button>
+            <button type="submit" class="boton w-full">@include('partials.icono', ['nombre' => 'ingresar']) Ingresar al sistema</button>
         </form>
 
         <p class="mt-6 text-center text-xs leading-5 text-slate-500">

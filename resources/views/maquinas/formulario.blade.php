@@ -4,7 +4,7 @@
 
 @section('contenido')
     <div class="mb-7">
-        <a class="text-sm text-teal-700 hover:underline" href="{{ route('maquinas.index') }}">← Volver a máquinas</a>
+        <a class="inline-flex items-center gap-2 text-sm text-teal-700 hover:underline" href="{{ route('maquinas.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a máquinas</a>
         <h1 class="mt-4 text-2xl font-semibold">{{ $maquina->exists ? 'Editar máquina' : 'Registrar máquina' }}</h1>
     </div>
 
@@ -53,7 +53,7 @@
         </div>
 
         <div class="flex flex-wrap gap-3 pt-3">
-            <button class="boton" type="submit">Guardar máquina</button>
+            <button class="boton" type="submit">@include('partials.icono', ['nombre' => 'guardar']) Guardar máquina</button>
             <a class="boton-secundario" href="{{ route('maquinas.index') }}">Cancelar</a>
         </div>
     </form>
