@@ -18,6 +18,9 @@
         .secundario { color: #666; font-size: 8px; }
         .nota { margin-top: 12px; color: #666; font-size: 8px; }
         .vacio { padding: 20px; text-align: center; }
+        .fotografia { text-align: center; }
+        .fotografia img { max-width: 115px; max-height: 115px; }
+        .fecha-foto { margin-top: 5px; font-size: 7px; color: #666; }
     </style>
 </head>
 <body>
@@ -38,7 +41,7 @@
     @foreach ($registros->isEmpty() ? collect([collect()]) : $registros->chunk(50) as $bloque)
     <table>
         <thead>
-            <tr><th style="width: 5%">N.°</th><th style="width: 18%">Trabajador / DNI</th><th style="width: 15%">Máquina</th><th style="width: 11%">Inicio</th><th style="width: 11%">Finalización</th><th style="width: 11%">Estado</th><th style="width: 12%">Revisión</th><th style="width: 17%">Revisor / Fecha</th></tr>
+            <tr><th style="width: 5%">N.°</th><th style="width: 15%">Trabajador / DNI</th><th style="width: 12%">Máquina</th><th style="width: 9%">Inicio</th><th style="width: 9%">Finalización</th><th style="width: 9%">Estado</th><th style="width: 10%">Revisión</th><th style="width: 13%">Revisor / Fecha</th><th style="width: 18%">Fotografía EPP</th></tr>
         </thead>
         <tbody>
             @forelse ($bloque as $registro)
@@ -51,13 +54,21 @@
                     <td>{{ $registro->estado }}</td>
                     <td>{{ $registro->fecha_revision ? 'Revisado' : ($registro->estado === 'Finalizado' ? 'Pendiente de revisión' : 'Sin finalizar') }}</td>
                     <td>@if ($registro->revisor){{ $registro->revisor->nombres }} {{ $registro->revisor->apellidos }}<br>@endif<span class="secundario">{{ $registro->fecha_revision?->format('d/m/Y H:i') ?? 'Sin revisión' }}</span></td>
+                    <td class="fotografia">
+                        @if ($fotografias[$registro->getKey()] ?? null)
+                            <img src="{{ $fotografias[$registro->getKey()] }}" alt="Fotografía EPP del registro #{{ $registro->id_registro }}">
+                        @else
+                            <span class="secundario">Fotografía no disponible</span>
+                        @endif
+                        <div class="fecha-foto">Captura: {{ $registro->fecha_fotografia->format('d/m/Y H:i:s') }}</div>
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="8" class="vacio">No se encontraron registros con los filtros seleccionados.</td></tr>
+                <tr><td colspan="9" class="vacio">No se encontraron registros con los filtros seleccionados.</td></tr>
             @endforelse
         </tbody>
     </table>
     @endforeach
-    <p class="nota">Este reporte resume los registros. Las fotografías, respuestas del ATS y firmas se consultan desde el detalle de cada registro en el sistema.</p>
+    <p class="nota">Este reporte incluye las fotografías del EPP y su fecha de captura. Las respuestas del ATS y las firmas se consultan desde el detalle de cada registro en el sistema.</p>
 </body>
 </html>

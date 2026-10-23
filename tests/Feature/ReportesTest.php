@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\ReporteService;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 
@@ -27,7 +28,7 @@ function usuarioReportesAts(string $rol = 'supervisor'): User
 it('permite consultar reportes al supervisor y al administrador', function (string $rol): void {
     $usuario = usuarioReportesAts($rol);
     $registro = RegistroAtsEpp::factory()->finalizado()->create();
-    $respuesta = $this->actingAs($usuario)->get(route('reportes.index'))->assertOk()->assertSee('Descargar PDF')->assertSee($registro->operador->dni)->assertSee('Registros encontrados: 1');
+    $respuesta = $this->actingAs($usuario)->get(route('reportes.index'))->assertOk()->assertSee('Descargar PDF')->assertSee('target="_blank"', false)->assertSee('rel="noopener noreferrer"', false)->assertSee($registro->operador->dni)->assertSee('Registros encontrados: 1');
     expect($respuesta->viewData('registros')->modelKeys())->toBe([$registro->getKey()]);
 })->with(['supervisor', 'administrador']);
 
@@ -54,7 +55,7 @@ it('descarga un PDF real con todas las páginas y los registros del filtro', fun
     $filtros = ['fecha_desde' => '2026-10-01', 'fecha_hasta' => '2026-10-01', 'id_maquina' => $maquina->getKey(), 'estado' => 'Finalizado', 'revision' => 'Pendiente'];
     $previa = $this->actingAs($supervisor)->get(route('reportes.index', $filtros))->assertOk()->assertSee('Registros encontrados: 45');
     expect($previa->viewData('registros')->count())->toBe(15);
-    $respuesta = $this->get(route('reportes.pdf', $filtros + ['page' => 2]))->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertDownload('reporte-ats-epp-'.now()->format('Ymd-His').'.pdf')->assertHeader('X-Content-Type-Options', 'nosniff');
+    $respuesta = $this->get(route('reportes.pdf', $filtros + ['page' => 2]))->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertHeader('Content-Disposition', 'inline; filename="reporte-ats-epp-'.now()->format('Ymd-His').'.pdf"')->assertHeader('X-Content-Type-Options', 'nosniff');
     expect($respuesta->getContent())->toStartWith('%PDF-');
     expect(preg_match_all('/\/Type\s*\/Page\b/', $respuesta->getContent()))->toBeGreaterThan(1);
     expect($respuesta->headers->get('Cache-Control'))->toContain('private', 'no-store');
@@ -125,15 +126,62 @@ it('escapa textos de usuarios y filtros en la plantilla PDF', function (): void 
 });
 
 it('permite descargar exactamente el máximo de registros sin recortar el listado', function (): void {
+    Storage::fake('local');
     $supervisor = usuarioReportesAts();
+    $ruta = 'registros/epp/maximo.jpg';
+    Storage::disk('local')->put($ruta, UploadedFile::fake()->image('captura.jpg', 360, 240)->getContent());
     $operador = User::factory()->create();
     $maquina = Maquina::factory()->create();
-    RegistroAtsEpp::factory()->count(ReporteService::MAXIMO_REGISTROS)->create(['id_operador' => $operador->getKey(), 'id_maquina' => $maquina->getKey()]);
+    RegistroAtsEpp::factory()->count(ReporteService::MAXIMO_REGISTROS)->create(['id_operador' => $operador->getKey(), 'id_maquina' => $maquina->getKey(), 'fotografia_epp' => $ruta]);
     $exportados = null;
     View::composer('reportes.pdf', function ($vista) use (&$exportados): void {
         $exportados = $vista->getData()['registros'];
     });
     $respuesta = $this->actingAs($supervisor)->get(route('reportes.pdf'))->assertOk()->assertHeader('Content-Type', 'application/pdf');
     expect($respuesta->getContent())->toStartWith('%PDF-');
+    expect(preg_match('/\/Subtype\s*\/Image\b/', $respuesta->getContent()))->toBe(1);
     expect($exportados)->toHaveCount(ReporteService::MAXIMO_REGISTROS);
 });
+
+it('incluye la fotografía privada del EPP como imagen dentro del PDF sin modificar el original', function (string $extension): void {
+    Storage::fake('local');
+    $supervisor = usuarioReportesAts();
+    $ruta = 'registros/epp/captura-prueba.'.$extension;
+    $original = UploadedFile::fake()->image('captura.'.$extension, 1200, 800)->getContent();
+    Storage::disk('local')->put($ruta, $original);
+    $registro = RegistroAtsEpp::factory()->create(['fotografia_epp' => $ruta, 'fecha_fotografia' => '2026-10-23 09:30:15']);
+    $fotografias = null;
+    View::composer('reportes.pdf', function ($vista) use (&$fotografias): void {
+        $fotografias = $vista->getData()['fotografias'];
+    });
+    $respuesta = $this->actingAs($supervisor)->get(route('reportes.pdf'))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+    expect(preg_match('/\/Subtype\s*\/Image\b/', $respuesta->getContent()))->toBe(1);
+    expect($fotografias[$registro->getKey()])->toStartWith('data:image/jpeg;base64,');
+    $miniatura = base64_decode(substr($fotografias[$registro->getKey()], strlen('data:image/jpeg;base64,')));
+    $dimensiones = getimagesizefromstring($miniatura);
+    expect([$dimensiones[0], $dimensiones[1]])->toBe([360, 240]);
+    expect(Storage::disk('local')->get($ruta))->toBe($original);
+    expect(Storage::disk('local')->allFiles())->toBe([$ruta]);
+})->with(['jpg', 'png']);
+
+it('genera el PDF con un aviso si la fotografía falta está dañada o apunta fuera de las fotos EPP', function (string $ruta, ?string $contenido): void {
+    Storage::fake('local');
+    $supervisor = usuarioReportesAts();
+    if ($contenido !== null) {
+        Storage::disk('local')->put($ruta, $contenido);
+    }
+    $registro = RegistroAtsEpp::factory()->create(['fotografia_epp' => $ruta]);
+    $fotografias = null;
+    View::composer('reportes.pdf', function ($vista) use (&$fotografias): void {
+        $fotografias = $vista->getData()['fotografias'];
+    });
+    $respuesta = $this->actingAs($supervisor)->get(route('reportes.pdf'))->assertOk();
+    expect($respuesta->getContent())->toStartWith('%PDF-');
+    expect($fotografias[$registro->getKey()])->toBeNull();
+    expect(preg_match('/\/Subtype\s*\/Image\b/', $respuesta->getContent()))->toBe(0);
+})->with([
+    'archivo ausente' => ['registros/epp/ausente.jpg', null],
+    'archivo dañado' => ['registros/epp/danada.jpg', 'esto no es una imagen'],
+    'archivo de firmas' => ['registros/firmas/firma.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')],
+    'ruta con retroceso' => ['registros/epp/../firmas/firma.png', null],
+]);

@@ -8,7 +8,7 @@ Sistema web para el área de Logística de Makro, desarrollado desde TID. Los da
 - Roles de administrador, supervisor y operador mediante Spatie Laravel Permission.
 - Registro y edición de usuarios y máquinas, con activación y desactivación.
 - Carga opcional y reemplazo de fotografías de máquinas, con miniaturas en el catálogo.
-- Consulta de reportes para administrador y supervisor, con filtros compartidos y descarga del listado en PDF A4 horizontal. Incluye trabajador/DNI, máquina, fechas, estado, revisión y revisor. El PDF contiene todos los resultados filtrados, hasta 1000 registros por descarga; si se supera ese límite se solicita reducir los filtros.
+- Consulta de reportes para administrador y supervisor, con filtros compartidos y vista del PDF A4 horizontal en otra pestaña, con fotografías del EPP y fecha de captura. Incluye trabajador/DNI, máquina, fechas, estado, revisión y revisor. El PDF contiene todos los resultados filtrados, hasta 1000 registros por descarga; si se supera ese límite se solicita reducir los filtros.
 - Asignación y retiro de máquinas autorizadas por operador.
 - Panel con registros del usuario y máquinas activas autorizadas.
 - Administración de preguntas ATS por etapa (Inicial/Final), posición y estado.
@@ -19,11 +19,11 @@ Sistema web para el área de Logística de Makro, desarrollado desde TID. Los da
 - Búsqueda combinable por nombres, apellidos o DNI, fechas de inicio, máquina, estado de la labor y revisión del supervisor. Los filtros se conservan al cambiar de página.
 - Migraciones, modelos y relaciones de `users`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
 
-El registro inicial queda en estado `En curso`; al responder el ATS final y firmar pasa a `Finalizado`. El supervisor puede revisar un registro finalizado desde su detalle y guardar su firma. Se conserva el estado `Finalizado` y se muestra la revisión por separado como `Pendiente de revisión` o `Revisado`. No se permite revisar registros propios ni sobrescribir una revisión. La búsqueda incluye máquinas históricas aunque estén inactivas o hayan sido desautorizadas. El selector solo muestra máquinas de registros que el usuario puede consultar. Las fechas Desde/Hasta incluyen ambos días y corresponden al inicio de la labor; el filtro de revisión solo incluye labores finalizadas. Los reportes PDF se generan con Dompdf; incluyen fecha de emisión, usuario que los generó, filtros aplicados y numeración de páginas. Son listados de resumen: las fotografías, respuestas y firmas se consultan en el detalle del registro. Los PDF se generan al descargarlos y no se almacenan en una carpeta pública.
+El registro inicial queda en estado `En curso`; al responder el ATS final y firmar pasa a `Finalizado`. El supervisor puede revisar un registro finalizado desde su detalle y guardar su firma. Se conserva el estado `Finalizado` y se muestra la revisión por separado como `Pendiente de revisión` o `Revisado`. No se permite revisar registros propios ni sobrescribir una revisión. La búsqueda incluye máquinas históricas aunque estén inactivas o hayan sido desautorizadas. El selector solo muestra máquinas de registros que el usuario puede consultar. Las fechas Desde/Hasta incluyen ambos días y corresponden al inicio de la labor; el filtro de revisión solo incluye labores finalizadas. Los reportes PDF se generan con Dompdf; incluyen fecha de emisión, usuario que los generó, filtros aplicados y numeración de páginas. Incluyen una miniatura de la fotografía del EPP por registro y su fecha de captura. Las respuestas y firmas se consultan en el detalle del registro. La fotografía original se mantiene privada y sin cambios; si falta o no se puede leer, el PDF indica que no está disponible. Los PDF se generan al descargarlos y no se almacenan en una carpeta pública.
 
 ## Requisitos
 
-PHP 8.5 con las extensiones habituales de Laravel (incluidas DOM y MBString para PDF) y PDO MySQL, Composer, Node.js 22.12 o superior y MySQL 8.0 o superior. Para ejecutar las pruebas también se necesita PDO SQLite. Las versiones exactas de los paquetes se encuentran en los archivos de bloqueo de Composer y npm.
+PHP 8.5 con las extensiones habituales de Laravel (incluidas DOM, MBString y GD para PDF y miniaturas) y PDO MySQL, Composer, Node.js 22.12 o superior y MySQL 8.0 o superior. Para ejecutar las pruebas también se necesita PDO SQLite. Las versiones exactas de los paquetes se encuentran en los archivos de bloqueo de Composer y npm.
 
 ## Instalación local
 

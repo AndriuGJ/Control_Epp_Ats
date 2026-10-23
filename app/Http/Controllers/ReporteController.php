@@ -22,7 +22,7 @@ class ReporteController extends Controller
 
         return response($contenido, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="reporte-ats-epp-'.now()->format('Ymd-His').'.pdf"',
+            'Content-Disposition' => 'inline; filename="reporte-ats-epp-'.now()->format('Ymd-His').'.pdf"',
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);
