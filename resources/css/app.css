@@ -33,7 +33,7 @@
     --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
     --radius-md: 0.125rem;
     --color-principal: #292d2f;
-    --color-fondo: #e8e9eb;
+    --color-fondo: #ffff;
     --color-acento: #2563eb;
 }
 @layer base {

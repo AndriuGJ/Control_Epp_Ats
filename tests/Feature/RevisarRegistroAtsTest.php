@@ -44,7 +44,7 @@ it('guarda el supervisor su firma y la fecha sin modificar los datos de la labor
     expect(Storage::disk('local')->get($registro->firma_revisor))->toBe(base64_decode(substr(firmaAtsPrueba(), strlen('data:image/png;base64,'))));
     expect(Storage::disk('local')->get($registro->firma_final))->toBe('firma final original');
     $this->get(route('registros.show', $registro))->assertOk()->assertSee('Revisado')->assertSee($supervisor->nombres)->assertSee(route('registros.firma-revisor', $registro))->assertDontSee('Guardar revisión');
-    $this->get(route('registros.index'))->assertOk()->assertSee('Revisado')->assertDontSee('Pendiente de revisión');
+    $this->get(route('registros.index'))->assertOk()->assertSee('Revisado')->assertViewHas('registros', fn ($registros): bool => $registros->every(fn (RegistroAtsEpp $registro): bool => $registro->fecha_revision !== null));
     $this->get(route('panel'))->assertOk()->assertViewHas('pendientesRevision', 0)->assertViewHas('finalizados', 1);
 });
 

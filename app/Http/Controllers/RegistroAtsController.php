@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FiltrarRegistrosAtsRequest;
 use App\Http\Requests\FinalizarRegistroAtsRequest;
 use App\Http\Requests\IniciarRegistroAtsRequest;
 use App\Http\Requests\RevisarRegistroAtsRequest;
@@ -17,9 +18,15 @@ class RegistroAtsController extends Controller
 {
     public function __construct(private RegistroAtsService $servicio) {}
 
-    public function index(Request $request): View
+    public function index(FiltrarRegistrosAtsRequest $request): View
     {
-        return view('registros.index', ['registros' => $this->servicio->listar($request->user())]);
+        $filtros = $request->safe()->except('page');
+
+        return view('registros.index', [
+            'registros' => $this->servicio->listar($request->user(), $filtros),
+            'maquinas' => $this->servicio->maquinasParaConsulta($request->user()),
+            'filtros' => $filtros,
+        ]);
     }
 
     public function create(Request $request): View|RedirectResponse

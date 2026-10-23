@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Maquina;
 use App\Models\PreguntaAts;
 use App\Models\RegistroAtsEpp;
 use App\Models\User;
@@ -20,9 +21,51 @@ class RegistroAtsService
 {
     public function __construct(private CapturaEppService $capturas) {}
 
-    public function listar(User $usuario): LengthAwarePaginator
+    /** @param array{fecha_desde?: ?string, fecha_hasta?: ?string, trabajador?: ?string, id_maquina?: int|string|null, estado?: ?string, revision?: ?string} $filtros */
+    public function listar(User $usuario, array $filtros = []): LengthAwarePaginator
     {
-        return $this->visiblesPara($usuario)->with(['operador', 'maquina'])->orderByDesc('fecha_inicio')->orderByDesc('id_registro')->paginate(15);
+        $consulta = $this->visiblesPara($usuario);
+        if (! empty($filtros['fecha_desde'])) {
+            $consulta->where('fecha_inicio', '>=', $filtros['fecha_desde'].' 00:00:00');
+        }
+        if (! empty($filtros['fecha_hasta'])) {
+            $consulta->where('fecha_inicio', '<=', $filtros['fecha_hasta'].' 23:59:59');
+        }
+        if (trim($filtros['trabajador'] ?? '') !== '') {
+            $terminos = preg_split('/\s+/u', trim($filtros['trabajador']), -1, PREG_SPLIT_NO_EMPTY);
+            $consulta->whereHas('operador', function (Builder $operadores) use ($terminos): void {
+                foreach ($terminos as $termino) {
+                    $operadores->where(function (Builder $coincidencias) use ($termino): void {
+                        $coincidencias->where('nombres', 'like', '%'.$termino.'%')
+                            ->orWhere('apellidos', 'like', '%'.$termino.'%')
+                            ->orWhere('dni', 'like', '%'.$termino.'%');
+                    });
+                }
+            });
+        }
+        if (! empty($filtros['id_maquina'])) {
+            $consulta->where('id_maquina', $filtros['id_maquina']);
+        }
+        if (! empty($filtros['estado'])) {
+            $consulta->where('estado', $filtros['estado']);
+        }
+        if (! empty($filtros['revision'])) {
+            $consulta->where('estado', 'Finalizado');
+            if ($filtros['revision'] === 'Revisado') {
+                $consulta->whereNotNull('fecha_revision');
+            } else {
+                $consulta->whereNull('fecha_revision');
+            }
+        }
+
+        return $consulta->with(['operador', 'maquina'])->orderByDesc('fecha_inicio')->orderByDesc('id_registro')->paginate(15)->appends($filtros);
+    }
+
+    /** @return Collection<int, Maquina> */
+    public function maquinasParaConsulta(User $usuario): Collection
+    {
+        return Maquina::query()->whereIn('id_maquina', $this->visiblesPara($usuario)->select('id_maquina'))
+            ->orderBy('nombre')->orderBy('id_maquina')->get(['id_maquina', 'nombre', 'estado']);
     }
 
     public function obtener(User $usuario, int $id): RegistroAtsEpp

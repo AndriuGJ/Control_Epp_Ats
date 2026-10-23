@@ -16,9 +16,10 @@ Sistema web para el área de Logística de Makro, desarrollado desde TID. Los da
 - Cierre del mismo registro con respuestas finales Sí/No y firma final, pasando a estado Finalizado.
 - Revisión única del supervisor con firma privada, identidad del revisor y fecha del servidor.
 - Consulta del registro guardado; cada operador ve sus registros y el supervisor puede consultarlos.
+- Búsqueda combinable por nombres, apellidos o DNI, fechas de inicio, máquina, estado de la labor y revisión del supervisor. Los filtros se conservan al cambiar de página.
 - Migraciones, modelos y relaciones de `users`, `maquinas`, `usuarios_maquinas`, `registros_ats_epp`, `preguntas_ats` y `respuestas_ats`.
 
-El registro inicial queda en estado `En curso`; al responder el ATS final y firmar pasa a `Finalizado`. El supervisor puede revisar un registro finalizado desde su detalle y guardar su firma. Se conserva el estado `Finalizado` y se muestra la revisión por separado como `Pendiente de revisión` o `Revisado`. No se permite revisar registros propios ni sobrescribir una revisión. Los filtros de búsqueda y la generación de reportes PDF se desarrollarán en las siguientes etapas.
+El registro inicial queda en estado `En curso`; al responder el ATS final y firmar pasa a `Finalizado`. El supervisor puede revisar un registro finalizado desde su detalle y guardar su firma. Se conserva el estado `Finalizado` y se muestra la revisión por separado como `Pendiente de revisión` o `Revisado`. No se permite revisar registros propios ni sobrescribir una revisión. La búsqueda incluye máquinas históricas aunque estén inactivas o hayan sido desautorizadas. El selector solo muestra máquinas de registros que el usuario puede consultar. Las fechas Desde/Hasta incluyen ambos días y corresponden al inicio de la labor; el filtro de revisión solo incluye labores finalizadas. La generación de reportes PDF se desarrollará en la siguiente etapa.
 
 ## Requisitos
 
