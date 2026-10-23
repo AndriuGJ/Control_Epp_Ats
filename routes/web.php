@@ -23,12 +23,14 @@ Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): v
     Route::post('/registros/captura', CapturaEppController::class)->middleware(['can:registros.crear', 'throttle:20,1'])->block()->name('registros.captura');
     Route::get('/registros/{registro}/finalizar', [RegistroAtsController::class, 'finalizar'])->whereNumber('registro')->middleware('can:registros.crear')->name('registros.finalizar');
     Route::post('/registros/{registro}/finalizar', [RegistroAtsController::class, 'guardarFinalizacion'])->whereNumber('registro')->middleware('can:registros.crear')->name('registros.finalizar.guardar');
+    Route::post('/registros/{registro}/revisar', [RegistroAtsController::class, 'guardarRevision'])->whereNumber('registro')->middleware('can:registros.revisar')->name('registros.revisar');
     Route::middleware('can:registros.consultar')->group(function (): void {
         Route::get('/registros', [RegistroAtsController::class, 'index'])->name('registros.index');
         Route::get('/registros/{registro}', [RegistroAtsController::class, 'show'])->whereNumber('registro')->name('registros.show');
         Route::get('/registros/{registro}/fotografia', [RegistroAtsController::class, 'fotografia'])->whereNumber('registro')->name('registros.fotografia');
         Route::get('/registros/{registro}/firma-final', [RegistroAtsController::class, 'firmaFinal'])->whereNumber('registro')->name('registros.firma-final');
         Route::get('/registros/{registro}/firma-inicial', [RegistroAtsController::class, 'firma'])->whereNumber('registro')->name('registros.firma');
+        Route::get('/registros/{registro}/firma-revisor', [RegistroAtsController::class, 'firmaRevisor'])->whereNumber('registro')->name('registros.firma-revisor');
     });
     Route::post('/salir', [SesionController::class, 'destroy'])->name('logout');
     Route::view('/reportes', 'reportes.index')->middleware('can:reportes.generar')->name('reportes.index');

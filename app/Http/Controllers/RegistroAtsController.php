@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FinalizarRegistroAtsRequest;
 use App\Http\Requests\IniciarRegistroAtsRequest;
+use App\Http\Requests\RevisarRegistroAtsRequest;
 use App\Services\CapturaEppService;
 use App\Services\RegistroAtsService;
 use Illuminate\Http\RedirectResponse;
@@ -76,6 +77,18 @@ class RegistroAtsController extends Controller
     public function firmaFinal(Request $request, int $registro): StreamedResponse
     {
         return $this->archivo($request, $registro, 'firma_final');
+    }
+
+    public function guardarRevision(RevisarRegistroAtsRequest $request, int $registro): RedirectResponse
+    {
+        $registroRevisado = $this->servicio->revisar($request->user(), $registro, $request->validated());
+
+        return to_route('registros.show', $registroRevisado)->with('estado', 'Revisión guardada correctamente.');
+    }
+
+    public function firmaRevisor(Request $request, int $registro): StreamedResponse
+    {
+        return $this->archivo($request, $registro, 'firma_revisor');
     }
 
     private function archivo(Request $request, int $id, string $campo): StreamedResponse

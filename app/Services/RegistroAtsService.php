@@ -27,7 +27,7 @@ class RegistroAtsService
 
     public function obtener(User $usuario, int $id): RegistroAtsEpp
     {
-        return $this->visiblesPara($usuario)->with(['operador', 'maquina', 'respuestas' => fn (HasMany $respuestas) => $respuestas->with('pregunta')->orderBy('id_respuesta')])->findOrFail($id);
+        return $this->visiblesPara($usuario)->with(['operador', 'maquina', 'revisor', 'respuestas' => fn (HasMany $respuestas) => $respuestas->with('pregunta')->orderBy('id_respuesta')])->findOrFail($id);
     }
 
     public function enCurso(User $usuario): ?RegistroAtsEpp
@@ -123,6 +123,47 @@ class RegistroAtsService
                     'id_pregunta' => $pregunta->getKey(), 'respuesta' => $datos['respuestas'][$pregunta->getKey()],
                 ])->all());
                 $registro->update(['estado' => 'Finalizado', 'fecha_finalizacion' => now(), 'firma_final' => $rutaFirma]);
+
+                return $registro;
+            });
+        } catch (Throwable $excepcion) {
+            if ($rutaFirma !== null) {
+                Storage::disk('local')->delete($rutaFirma);
+            }
+            throw $excepcion;
+        }
+    }
+
+    /** @param array{firma_revisor: string} $datos */
+    public function revisar(User $usuario, int $id, array $datos): RegistroAtsEpp
+    {
+        abort_unless($usuario->estado && $usuario->can('registros.revisar'), 403);
+        $firma = $this->decodificarFirma($datos['firma_revisor'], 'firma_revisor');
+        $rutaFirma = null;
+
+        try {
+            return DB::transaction(function () use ($usuario, $id, $firma, &$rutaFirma): RegistroAtsEpp {
+                $revisor = User::query()->lockForUpdate()->findOrFail($usuario->getKey());
+                abort_unless($revisor->estado && $revisor->can('registros.revisar'), 403);
+                $registro = $this->visiblesPara($revisor)->lockForUpdate()->findOrFail($id);
+                if ($registro->id_operador === $revisor->getKey()) {
+                    throw ValidationException::withMessages(['registro' => 'Otro supervisor debe revisar tu registro.']);
+                }
+                if ($registro->estado !== 'Finalizado' || ! $registro->firma_final || ! $registro->fecha_finalizacion) {
+                    throw ValidationException::withMessages(['registro' => 'Solo se pueden revisar registros con la labor finalizada.']);
+                }
+                if ($registro->id_revisor !== null || $registro->fecha_revision !== null || $registro->firma_revisor !== null) {
+                    throw ValidationException::withMessages(['registro' => 'Este registro ya fue revisado y su revisión no se puede modificar.']);
+                }
+                $rutaFirma = 'registros/firmas/'.Str::uuid().'.png';
+                if (! Storage::disk('local')->put($rutaFirma, $firma)) {
+                    throw ValidationException::withMessages(['firma_revisor' => 'No se pudo guardar la firma del supervisor. Inténtalo nuevamente.']);
+                }
+                $registro->update([
+                    'id_revisor' => $revisor->getKey(),
+                    'firma_revisor' => $rutaFirma,
+                    'fecha_revision' => now(),
+                ]);
 
                 return $registro;
             });

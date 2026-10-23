@@ -19,7 +19,7 @@
                         <td>{{ $pregunta->pregunta }}</td>
                         <td>{{ $pregunta->etapa }}</td>
                         <td>{{ $pregunta->posicion }}</td>
-                        <td><span class="insignia">{{ $pregunta->estado ? 'Activa' : 'Inactiva' }}</span></td>
+                        <td><span class="insignia {{ $pregunta->estado ? 'insignia-activa' : 'insignia-inactiva' }}">{{ $pregunta->estado ? 'Activa' : 'Inactiva' }}</span></td>
                         <td><a class="inline-flex items-center gap-2 text-principal hover:underline" href="{{ route('preguntas.edit', $pregunta) }}">@include('partials.icono', ['nombre' => 'editar']) Editar</a></td>
                     </tr>
                 @empty

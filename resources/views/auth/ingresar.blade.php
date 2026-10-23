@@ -30,7 +30,7 @@
 
             <label class="flex cursor-pointer items-center gap-3 text-sm text-neutral-600">
                 <input type="checkbox" name="recordarme" value="1"
-                    class="size-4 accent-principal" @checked(old('recordarme'))>
+                    class="size-4 accent-acento" @checked(old('recordarme'))>
                 Mantener mi sesión iniciada
             </label>
 

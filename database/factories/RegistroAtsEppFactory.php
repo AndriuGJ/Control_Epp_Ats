@@ -16,4 +16,13 @@ class RegistroAtsEppFactory extends Factory
     {
         return ['id_operador' => User::factory(), 'id_maquina' => Maquina::factory(), 'fotografia_epp' => 'epp/foto.jpg', 'fecha_fotografia' => now(), 'firma_inicial' => 'firmas/inicio.png', 'fecha_inicio' => now(), 'estado' => 'En curso'];
     }
+
+    public function finalizado(): static
+    {
+        return $this->state(fn (): array => [
+            'estado' => 'Finalizado',
+            'firma_final' => 'firmas/final.png',
+            'fecha_finalizacion' => now(),
+        ]);
+    }
 }

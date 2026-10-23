@@ -6,7 +6,7 @@
     <div class="mb-7 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-semibold">Registros ATS/EPP</h1>
-            <p class="mt-2 text-sm text-neutral-500">Consulta la información guardada al iniciar la labor.</p>
+            <p class="mt-2 text-sm text-neutral-500">Consulta el inicio, el cierre y la revisión de cada labor.</p>
         </div>
         @can('registros.crear')
             <a class="boton" href="{{ route('registros.create') }}">@include('partials.icono', ['nombre' => 'agregar']) Iniciar registro</a>
@@ -22,7 +22,7 @@
                         <td>{{ $registro->operador->nombres }} {{ $registro->operador->apellidos }}</td>
                         <td>{{ $registro->maquina->nombre }}</td>
                         <td>{{ $registro->fecha_inicio->format('d/m/Y H:i') }}</td>
-                        <td><span class="insignia">{{ $registro->estado }}</span></td>
+                        <td>@include('partials.estado-registro', ['registro' => $registro])</td>
                         <td><a class="text-principal hover:underline" href="{{ route('registros.show', $registro) }}">Ver registro</a></td>
                     </tr>
                 @empty

@@ -39,7 +39,7 @@
                             <p class="mt-1 text-xs text-neutral-500">{{ $maquina->descripcion }}</p>
                         </td>
                         <td>{{ $maquina->operadores_count }}</td>
-                        <td><span class="insignia">{{ $maquina->estado ? 'Activa' : 'Inactiva' }}</span></td>
+                        <td><span class="insignia {{ $maquina->estado ? 'insignia-activa' : 'insignia-inactiva' }}">{{ $maquina->estado ? 'Activa' : 'Inactiva' }}</span></td>
                         <td><a class="inline-flex items-center gap-2 font-medium text-principal hover:underline" href="{{ route('maquinas.edit', $maquina) }}">@include('partials.icono', ['nombre' => 'editar']) Editar</a></td>
                     </tr>
                 @empty
