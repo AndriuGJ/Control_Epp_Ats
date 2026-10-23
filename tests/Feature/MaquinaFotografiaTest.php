@@ -117,7 +117,7 @@ it('muestra Reportes en el menú y permite abrir su vista a los roles autorizado
     $usuario->assignRole($rol);
 
     $this->actingAs($usuario)->get(route('panel'))->assertOk()->assertSee(route('reportes.index'));
-    $this->get(route('reportes.index'))->assertOk()->assertSee('Sección en preparación');
+    $this->get(route('reportes.index'))->assertOk()->assertSee('Descargar PDF');
 })->with(['administrador', 'supervisor']);
 
 it('oculta Reportes y restringe su acceso a los operadores', function (): void {

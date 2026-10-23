@@ -24,6 +24,11 @@ class RegistroAtsService
     /** @param array{fecha_desde?: ?string, fecha_hasta?: ?string, trabajador?: ?string, id_maquina?: int|string|null, estado?: ?string, revision?: ?string} $filtros */
     public function listar(User $usuario, array $filtros = []): LengthAwarePaginator
     {
+        return $this->consultar($usuario, $filtros)->paginate(15)->appends($filtros);
+    }
+
+    public function consultar(User $usuario, array $filtros = []): Builder
+    {
         $consulta = $this->visiblesPara($usuario);
         if (! empty($filtros['fecha_desde'])) {
             $consulta->where('fecha_inicio', '>=', $filtros['fecha_desde'].' 00:00:00');
@@ -58,7 +63,7 @@ class RegistroAtsService
             }
         }
 
-        return $consulta->with(['operador', 'maquina'])->orderByDesc('fecha_inicio')->orderByDesc('id_registro')->paginate(15)->appends($filtros);
+        return $consulta->with(['operador', 'maquina'])->orderByDesc('fecha_inicio')->orderByDesc('id_registro');
     }
 
     /** @return Collection<int, Maquina> */

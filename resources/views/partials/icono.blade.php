@@ -2,6 +2,9 @@
     fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
     stroke-linejoin="round" aria-hidden="true" focusable="false">
     @switch($nombre)
+        @case('descargar')
+            <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+            @break
         @case('buscar')
             <circle cx="10.5" cy="10.5" r="6.5" />
             <path d="m16 16 5 5" />

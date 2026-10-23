@@ -5,6 +5,7 @@ use App\Http\Controllers\MaquinaController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PreguntaAtsController;
 use App\Http\Controllers\RegistroAtsController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\SesionController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Middleware\VerificarUsuarioActivo;
@@ -33,7 +34,8 @@ Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): v
         Route::get('/registros/{registro}/firma-revisor', [RegistroAtsController::class, 'firmaRevisor'])->whereNumber('registro')->name('registros.firma-revisor');
     });
     Route::post('/salir', [SesionController::class, 'destroy'])->name('logout');
-    Route::view('/reportes', 'reportes.index')->middleware('can:reportes.generar')->name('reportes.index');
+    Route::get('/reportes', [ReporteController::class, 'index'])->middleware('can:reportes.generar')->name('reportes.index');
+    Route::get('/reportes/pdf', [ReporteController::class, 'pdf'])->middleware(['can:reportes.generar', 'throttle:10,1'])->name('reportes.pdf');
     Route::get('/maquinas/{maquina}/fotografia', [MaquinaController::class, 'fotografia'])->middleware('can:maquinas.gestionar')->name('maquinas.fotografia');
     Route::resource('usuarios', UsuarioController::class)->parameters(['usuarios' => 'usuario'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:usuarios.gestionar');
     Route::resource('maquinas', MaquinaController::class)->parameters(['maquinas' => 'maquina'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:maquinas.gestionar');
