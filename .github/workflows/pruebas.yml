@@ -34,6 +34,12 @@ jobs:
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env
       - run: php artisan key:generate
+      - name: Verificar seeder de preguntas ATS
+        run: |
+          vendor/bin/pint --dirty --format agent
+          vendor/bin/pint database/seeders/PreguntasAtsSeeder.php tests/Feature/PreguntasAtsSeederTest.php --format agent
+          git diff --exit-code
+          php artisan test --compact tests/Feature/PreguntasAtsSeederTest.php
       - run: npm ci
       - run: npm run build
       - run: php artisan test --compact
@@ -42,7 +48,7 @@ jobs:
           php artisan migrate --seed --force
           php artisan migrate:reset --force
           php artisan migrate --seed --force
-          php artisan test --compact tests/Feature/PreguntasAtsTest.php tests/Feature/RegistroInicialAtsTest.php tests/Feature/CapturaEppTest.php tests/Feature/FinalizarRegistroAtsTest.php tests/Feature/RevisarRegistroAtsTest.php tests/Feature/FiltrarRegistrosAtsTest.php tests/Feature/ReportesTest.php
+          php artisan test --compact tests/Feature/PreguntasAtsTest.php tests/Feature/RegistroInicialAtsTest.php tests/Feature/CapturaEppTest.php tests/Feature/FinalizarRegistroAtsTest.php tests/Feature/RevisarRegistroAtsTest.php tests/Feature/FiltrarRegistrosAtsTest.php tests/Feature/ReportesTest.php tests/Feature/PreguntasAtsSeederTest.php
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
