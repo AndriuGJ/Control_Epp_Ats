@@ -34,9 +34,4 @@ class GuardarUsuarioRequest extends FormRequest
             'maquinas.*' => ['integer', 'distinct', Rule::exists('maquinas', 'id_maquina')],
         ];
     }
-
-    public function attributes(): array
-    {
-        return ['contrasena' => 'contraseña', 'correo' => 'correo electrónico', 'dni' => 'DNI'];
-    }
 }

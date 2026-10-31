@@ -23,10 +23,6 @@ class GuardarMaquinaRequest extends FormRequest
 
     public function messages(): array
     {
-        return [
-            'fotografia.image' => 'La fotografía debe ser una imagen válida.',
-            'fotografia.mimes' => 'La fotografía debe estar en formato JPG, PNG o WEBP.',
-            'fotografia.max' => 'La fotografía no debe superar los 4 MB.',
-        ];
+        return __('validation.formularios.guardar_maquina');
     }
 }

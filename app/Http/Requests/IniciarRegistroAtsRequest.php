@@ -27,24 +27,6 @@ class IniciarRegistroAtsRequest extends FormRequest
 
     public function messages(): array
     {
-        return [
-            'firma_inicial.required' => 'Dibuja tu firma antes de iniciar el registro.',
-            'firma_inicial.max' => 'La imagen de la firma es demasiado grande. Limpia el recuadro y vuelve a firmar.',
-            'respuestas.required' => 'Responde las preguntas iniciales del ATS.',
-            'respuestas.min' => 'Responde las preguntas iniciales del ATS.',
-            'respuestas.max' => 'El formulario admite hasta 100 preguntas iniciales.',
-            'respuestas.*.required' => 'Debes responder todas las preguntas iniciales.',
-            'respuestas.*.in' => 'Selecciona únicamente Sí o No en cada pregunta.',
-            'captura_epp.required' => 'Toma tu fotografía con la cámara antes de iniciar el registro.',
-            'captura_epp.uuid' => 'Vuelve a tomar la fotografía con la cámara.',
-            'fotografia_epp.prohibited' => 'Usa la cámara del formulario para tomar la fotografía.',
-            'version_preguntas.required' => 'Recarga el formulario antes de iniciar el registro.',
-            'version_preguntas.size' => 'Recarga el formulario antes de iniciar el registro.',
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return ['id_maquina' => 'máquina', 'firma_inicial' => 'firma inicial'];
+        return __('validation.formularios.iniciar_registro');
     }
 }

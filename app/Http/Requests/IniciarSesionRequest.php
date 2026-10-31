@@ -25,6 +25,6 @@ class IniciarSesionRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['correo.required' => 'Ingresa tu correo electrónico.', 'correo.email' => 'Ingresa un correo electrónico válido.', 'contrasena.required' => 'Ingresa tu contraseña.'];
+        return __('validation.formularios.iniciar_sesion');
     }
 }

@@ -3,6 +3,7 @@
 use App\Models\Maquina;
 use App\Models\RegistroAtsEpp;
 use App\Models\User;
+use Database\Seeders\AdministradorSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -84,16 +85,18 @@ it('escapa los datos de usuarios al mostrarlos en las vistas', function (): void
     $this->actingAs($admin)->get('/maquinas')->assertOk()->assertDontSee('<script>alert(1)</script>', false)->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
 });
 
-it('crea un administrador por consola sin credenciales predeterminadas', function (): void {
-    $this->artisan('app:crear-administrador')
-        ->expectsQuestion('Nombres', 'Responsable')
-        ->expectsQuestion('Apellidos', 'Logística')
-        ->expectsQuestion('DNI (8 dígitos)', '87654321')
-        ->expectsQuestion('Correo electrónico', 'responsable@example.test')
-        ->expectsQuestion('Contraseña (mínimo 12 caracteres, letras y números)', 'ClaveTemporal123!')
-        ->expectsQuestion('Confirma la contraseña', 'ClaveTemporal123!')
-        ->assertSuccessful();
-    $usuario = User::where('correo', 'responsable@example.test')->firstOrFail();
-    expect($usuario->hasRole('administrador'))->toBeTrue();
-    expect(Hash::check('ClaveTemporal123!', $usuario->contrasena))->toBeTrue();
+it('crea el administrador mediante el seeder y conserva sus datos al repetirlo', function (): void {
+    $this->seed(AdministradorSeeder::class);
+    $usuario = User::where('correo', 'admincontrol@gmail.com')->firstOrFail();
+    expect($usuario->hasRole('administrador'))->toBeTrue()
+        ->and(Hash::check('admin123++--++--++', $usuario->contrasena))->toBeTrue();
+
+    $usuario->update(['nombres' => 'Responsable', 'contrasena' => 'ClavePersonal123!']);
+    $hash = $usuario->fresh()->contrasena;
+    $this->seed(AdministradorSeeder::class);
+
+    expect(User::query()->count())->toBe(1)
+        ->and($usuario->fresh()->nombres)->toBe('Responsable')
+        ->and($usuario->fresh()->contrasena)->toBe($hash)
+        ->and($usuario->fresh()->hasRole('administrador'))->toBeTrue();
 });

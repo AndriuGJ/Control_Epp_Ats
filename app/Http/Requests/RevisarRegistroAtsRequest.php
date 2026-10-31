@@ -18,10 +18,6 @@ class RevisarRegistroAtsRequest extends FormRequest
 
     public function messages(): array
     {
-        return [
-            'firma_revisor.required' => 'Dibuja tu firma antes de guardar la revisión.',
-            'firma_revisor.string' => 'Dibuja una firma válida en el recuadro.',
-            'firma_revisor.max' => 'La firma es demasiado grande. Limpia el recuadro y vuelve a firmar.',
-        ];
+        return __('validation.formularios.revisar_registro');
     }
 }

@@ -24,6 +24,6 @@ class GuardarPreguntaAtsRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['posicion.min' => 'La posición debe ser al menos 1.', 'posicion.max' => 'La posición no debe superar 999.'];
+        return __('validation.formularios.guardar_pregunta');
     }
 }
