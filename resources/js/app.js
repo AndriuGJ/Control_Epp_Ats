@@ -1,3 +1,4 @@
+import './preguntas';
 import './firma';
 import './camara';
 

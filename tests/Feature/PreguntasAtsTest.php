@@ -62,3 +62,64 @@ it('escapa el texto de las preguntas en las vistas', function (): void {
     PreguntaAts::factory()->create(['pregunta' => '<script>alert(1)</script>']);
     $this->actingAs($admin)->get(route('preguntas.index'))->assertOk()->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)->assertDontSee('<script>alert(1)</script>', false);
 });
+
+it('sugiere la siguiente posición independiente para cada etapa incluyendo preguntas inactivas', function (): void {
+    $this->seed(RolesPermisosSeeder::class);
+    $admin = User::factory()->create();
+    $admin->assignRole('administrador');
+    PreguntaAts::factory()->create(['etapa' => 'Inicial', 'posicion' => 4, 'estado' => false]);
+    PreguntaAts::factory()->create(['etapa' => 'Final', 'posicion' => 8]);
+
+    $this->actingAs($admin)->get(route('preguntas.create'))->assertOk()
+        ->assertViewHas('siguientesPosiciones', ['Inicial' => 5, 'Final' => 9])
+        ->assertSee('value="5"', false);
+});
+
+it('rechaza una posición repetida al crear pero permite el mismo número en otra etapa', function (): void {
+    $this->seed(RolesPermisosSeeder::class);
+    $admin = User::factory()->create();
+    $admin->assignRole('administrador');
+    PreguntaAts::factory()->create(['etapa' => 'Inicial', 'posicion' => 1, 'estado' => false]);
+    $datos = ['pregunta' => 'Pregunta nueva', 'etapa' => 'Inicial', 'posicion' => 1, 'estado' => 1];
+
+    $this->actingAs($admin)->post(route('preguntas.store'), $datos)->assertSessionHasErrors('posicion');
+    $this->assertDatabaseCount('preguntas_ats', 1);
+    $this->post(route('preguntas.store'), array_replace($datos, ['etapa' => 'Final']))->assertRedirect(route('preguntas.index'));
+    $this->assertDatabaseHas('preguntas_ats', ['pregunta' => 'Pregunta nueva', 'etapa' => 'Final', 'posicion' => 1]);
+});
+
+it('intercambia posiciones sin alterar respuestas ni preguntas de otra etapa', function (): void {
+    $this->seed(RolesPermisosSeeder::class);
+    $admin = User::factory()->create();
+    $admin->assignRole('administrador');
+    $primera = PreguntaAts::factory()->create(['etapa' => 'Inicial', 'posicion' => 1]);
+    $segunda = PreguntaAts::factory()->create(['etapa' => 'Inicial', 'posicion' => 2, 'estado' => false]);
+    $final = PreguntaAts::factory()->create(['etapa' => 'Final', 'posicion' => 2]);
+    $respuesta = RespuestaAts::factory()->create(['id_pregunta' => $primera->getKey()]);
+
+    $this->actingAs($admin)->put(route('preguntas.update', $primera), [
+        'pregunta' => $primera->pregunta, 'etapa' => 'Inicial', 'posicion' => 2, 'estado' => 1,
+    ])->assertRedirect(route('preguntas.index'));
+
+    expect($primera->fresh()->posicion)->toBe(2)
+        ->and($segunda->fresh()->posicion)->toBe(1)
+        ->and($segunda->fresh()->estado)->toBeFalse()
+        ->and($final->fresh()->posicion)->toBe(2)
+        ->and($respuesta->fresh()->id_pregunta)->toBe($primera->getKey());
+});
+
+it('rechaza intercambiar posiciones entre etapas distintas sin modificar ninguna pregunta', function (): void {
+    $this->seed(RolesPermisosSeeder::class);
+    $admin = User::factory()->create();
+    $admin->assignRole('administrador');
+    $pregunta = PreguntaAts::factory()->create(['etapa' => 'Inicial', 'posicion' => 1]);
+    $ocupante = PreguntaAts::factory()->create(['etapa' => 'Final', 'posicion' => 2]);
+
+    $this->actingAs($admin)->put(route('preguntas.update', $pregunta), [
+        'pregunta' => $pregunta->pregunta, 'etapa' => 'Final', 'posicion' => 2, 'estado' => 1,
+    ])->assertSessionHasErrors('posicion');
+
+    expect($pregunta->fresh()->etapa)->toBe('Inicial')
+        ->and($pregunta->fresh()->posicion)->toBe(1)
+        ->and($ocupante->fresh()->posicion)->toBe(2);
+});

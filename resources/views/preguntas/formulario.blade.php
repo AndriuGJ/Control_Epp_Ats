@@ -7,7 +7,7 @@
         <a class="inline-flex items-center gap-2 text-sm text-principal hover:underline" href="{{ route('preguntas.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a preguntas</a>
         <h1 class="mt-4 text-2xl font-semibold">{{ $pregunta->exists ? 'Editar pregunta ATS' : 'Registrar pregunta ATS' }}</h1>
     </div>
-    <form method="POST" action="{{ $pregunta->exists ? route('preguntas.update', $pregunta) : route('preguntas.store') }}" class="tarjeta max-w-2xl space-y-5">
+    <form method="POST" action="{{ $pregunta->exists ? route('preguntas.update', $pregunta) : route('preguntas.store') }}" class="tarjeta max-w-2xl space-y-5" data-formulario-pregunta data-siguientes-posiciones="{{ json_encode($siguientesPosiciones) }}" data-etapa-original="{{ $pregunta->exists ? $pregunta->etapa : '' }}" data-posicion-original="{{ $pregunta->posicion }}">
         @csrf
         @if ($pregunta->exists)
             @method('PUT')
@@ -28,7 +28,8 @@
             </div>
             <div>
                 <label class="etiqueta" for="posicion">Posición</label>
-                <input class="campo" name="posicion" id="posicion" type="number" min="1" max="999" value="{{ old('posicion', $pregunta->posicion) }}" required>
+                <input class="campo" name="posicion" id="posicion" type="number" min="1" max="999" value="{{ old('posicion', $pregunta->posicion ?? ($siguientesPosiciones[old('etapa', $pregunta->etapa)] ?? 1)) }}" required>
+                <p class="mt-2 text-xs text-neutral-500">{{ $pregunta->exists ? 'Si eliges una posición ocupada en esta misma etapa, ambas preguntas intercambiarán posiciones.' : 'Se sugiere la siguiente posición de la etapa. No se permiten posiciones repetidas.' }}</p>
             </div>
             <div>
                 <label class="etiqueta" for="estado">Estado</label>

@@ -19,7 +19,7 @@ class PreguntaAtsController extends Controller
 
     public function create(): View
     {
-        return view('preguntas.formulario', ['pregunta' => new PreguntaAts(['estado' => true, 'etapa' => 'Inicial', 'posicion' => 1])]);
+        return view('preguntas.formulario', ['pregunta' => new PreguntaAts(['estado' => true, 'etapa' => 'Inicial']), 'siguientesPosiciones' => $this->servicio->siguientesPosiciones()]);
     }
 
     public function store(GuardarPreguntaAtsRequest $request): RedirectResponse
@@ -31,7 +31,7 @@ class PreguntaAtsController extends Controller
 
     public function edit(PreguntaAts $pregunta): View
     {
-        return view('preguntas.formulario', compact('pregunta'));
+        return view('preguntas.formulario', ['pregunta' => $pregunta, 'siguientesPosiciones' => $this->servicio->siguientesPosiciones()]);
     }
 
     public function update(GuardarPreguntaAtsRequest $request, PreguntaAts $pregunta): RedirectResponse

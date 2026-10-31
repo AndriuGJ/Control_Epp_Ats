@@ -12,6 +12,6 @@ class PreguntaAtsFactory extends Factory
 
     public function definition(): array
     {
-        return ['pregunta' => fake()->sentence().'?', 'etapa' => 'Inicial', 'posicion' => 1, 'estado' => true];
+        return ['pregunta' => fake()->sentence().'?', 'etapa' => 'Inicial', 'posicion' => fn (array $atributos): int => (int) PreguntaAts::query()->where('etapa', $atributos['etapa'])->max('posicion') + 1, 'estado' => true];
     }
 }
