@@ -7,8 +7,20 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <main class="flex min-h-dvh items-center justify-center p-5 sm:p-8">
-        @yield('contenido')
-    </main>
+    <div
+        class="fondo-login"
+        style="background-image:
+            radial-gradient(
+                ellipse at center,
+                rgba(0, 0, 0, 0.10) 0%,
+                rgba(0, 0, 0, 0.55) 65%,
+                rgba(0, 0, 0, 0.90) 100%
+            ),
+            url('{{ asset('img/logo.jpeg') }}');"
+    >
+        <main class="flex min-h-dvh items-center justify-center p-5 sm:p-8">
+            @yield('contenido')
+        </main>
+    </div>
 </body>
 </html>

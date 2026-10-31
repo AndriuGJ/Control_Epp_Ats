@@ -56,3 +56,11 @@
     .tabla th { @apply whitespace-nowrap border-b border-neutral-200 bg-neutral-50 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-neutral-500; }
     .tabla td { @apply border-b border-neutral-100 px-6 py-4; }
 }
+
+.fondo-login {
+    min-height: 100dvh;
+    background-color: #202124;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

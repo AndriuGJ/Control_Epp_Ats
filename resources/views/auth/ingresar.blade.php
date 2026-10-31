@@ -28,11 +28,11 @@
                     autocomplete="current-password" required>
             </div>
 
-            <label class="flex cursor-pointer items-center gap-3 text-sm text-neutral-600">
+            {{-- <label class="flex cursor-pointer items-center gap-3 text-sm text-neutral-600">
                 <input type="checkbox" name="recordarme" value="1"
                     class="size-4 accent-acento" @checked(old('recordarme'))>
                 Mantener mi sesión iniciada
-            </label>
+            </label> --}}
 
             <button type="submit" class="boton w-full">@include('partials.icono', ['nombre' => 'ingresar']) Ingresar al sistema</button>
         </form>

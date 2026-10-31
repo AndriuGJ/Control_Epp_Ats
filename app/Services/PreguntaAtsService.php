@@ -11,7 +11,7 @@ class PreguntaAtsService
 {
     public function listar(): LengthAwarePaginator
     {
-        return PreguntaAts::query()->orderBy('etapa')->orderBy('posicion')->orderBy('id_pregunta')->paginate(20);
+        return PreguntaAts::query()->orderBy('etapa')->orderBy('posicion')->orderBy('id_pregunta')->paginate(10);
     }
 
     /** @param array{pregunta: string, etapa: string, posicion: int, estado: bool} $datos */
