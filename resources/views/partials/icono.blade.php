@@ -5,9 +5,6 @@
         @case('ordenar')
             <path d="M8 3v18m-4-4 4 4 4-4M16 21V3m-4 4 4-4 4 4" />
             @break
-        @case('arrastrar')
-            <path d="M8 5h.01M16 5h.01M8 12h.01M16 12h.01M8 19h.01M16 19h.01" stroke-width="4" />
-            @break
         @case('subir')
             <path d="M12 20V4m-6 6 6-6 6 6" />
             @break

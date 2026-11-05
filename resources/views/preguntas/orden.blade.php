@@ -6,7 +6,7 @@
     <div class="mb-7">
         <a class="inline-flex items-center gap-2 text-sm text-principal hover:underline" href="{{ route('preguntas.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a preguntas</a>
         <h1 class="mt-4 text-2xl font-semibold">Orden de preguntas</h1>
-        <p class="mt-2 text-sm text-neutral-500">Selecciona la etapa y organiza sus preguntas. Arrastra desde los puntos o usa las flechas para subir y bajar.</p>
+        <p class="mt-2 text-sm text-neutral-500">Selecciona la etapa y usa las flechas para subir o bajar las preguntas.</p>
     </div>
 
     <div class="max-w-4xl space-y-5">
@@ -34,9 +34,6 @@
             <ol class="space-y-3" data-lista-orden aria-label="Preguntas de la etapa {{ $etapa }}">
                 @forelse ($preguntas as $pregunta)
                     <li class="flex items-center gap-3 rounded-md border border-neutral-200 bg-white p-3 sm:gap-4 sm:p-4" data-pregunta-orden>
-                        <button type="button" class="shrink-0 touch-none cursor-grab rounded-md p-2 text-neutral-400 hover:bg-neutral-100 hover:text-principal active:cursor-grabbing disabled:cursor-default disabled:opacity-40" data-arrastrar aria-label="Arrastrar pregunta: {{ $pregunta->pregunta }}" title="Arrastrar pregunta">
-                            @include('partials.icono', ['nombre' => 'arrastrar'])
-                        </button>
                         <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-sm font-semibold" data-numero-orden>{{ $loop->iteration }}</span>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm wrap-break-word">{{ $pregunta->pregunta }}</p>
