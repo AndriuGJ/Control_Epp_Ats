@@ -13,6 +13,7 @@ return [
     'array' => 'El campo :attribute debe ser una lista.',
     'integer' => 'El campo :attribute debe ser un número entero.',
     'distinct' => 'El campo :attribute contiene valores repetidos.',
+    'list' => 'El campo :attribute debe ser una lista ordenada.',
     'date_format' => 'El campo :attribute debe tener el formato :format.',
     'after_or_equal' => 'El campo :attribute debe ser una fecha igual o posterior a :date.',
     'image' => 'El campo :attribute debe ser una imagen válida.',
@@ -67,6 +68,9 @@ return [
         'pregunta' => 'pregunta',
         'etapa' => 'etapa',
         'posicion' => 'posición',
+        'orden' => 'orden de preguntas',
+        'orden.*' => 'pregunta del orden',
+        'version_orden' => 'versión del orden',
         'fecha_desde' => 'fecha desde',
         'fecha_hasta' => 'fecha hasta',
         'trabajador' => 'trabajador',
@@ -123,9 +127,11 @@ return [
             'version_preguntas.required' => 'Recarga el formulario antes de finalizar.',
             'version_preguntas.size' => 'Recarga el formulario antes de finalizar.',
         ],
-        'guardar_pregunta' => [
-            'posicion.min' => 'La posición debe ser al menos 1.',
-            'posicion.max' => 'La posición no debe superar 999.',
+        'ordenar_preguntas' => [
+            'orden.required' => 'Selecciona una etapa con preguntas para ordenar.',
+            'orden.*.distinct' => 'Una pregunta no puede aparecer más de una vez en la lista.',
+            'version_orden.required' => 'Recarga la lista antes de guardar el orden.',
+            'version_orden.size' => 'Recarga la lista antes de guardar el orden.',
         ],
         'capturar_epp' => [
             'fotografia.required' => 'Toma una fotografía con la cámara.',
@@ -139,5 +145,10 @@ return [
             'fotografia.mimes' => 'La fotografía debe estar en formato JPG, PNG o WEBP.',
             'fotografia.max' => 'La fotografía no debe superar los 4 MB.',
         ],
+    ],
+    'preguntas' => [
+        'respondida' => 'Esta pregunta ya tiene respuestas. Conserva su texto y etapa; puedes desactivarla y crear otra.',
+        'cambio_concurrente' => 'Las preguntas cambiaron. Recarga el formulario y vuelve a intentarlo.',
+        'orden_desactualizado' => 'La lista de preguntas cambió o no está completa. Recarga la lista y vuelve a ordenar.',
     ],
 ];

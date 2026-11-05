@@ -2,6 +2,18 @@
     fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
     stroke-linejoin="round" aria-hidden="true" focusable="false">
     @switch($nombre)
+        @case('ordenar')
+            <path d="M8 3v18m-4-4 4 4 4-4M16 21V3m-4 4 4-4 4 4" />
+            @break
+        @case('arrastrar')
+            <path d="M8 5h.01M16 5h.01M8 12h.01M16 12h.01M8 19h.01M16 19h.01" stroke-width="4" />
+            @break
+        @case('subir')
+            <path d="M12 20V4m-6 6 6-6 6 6" />
+            @break
+        @case('bajar')
+            <path d="M12 4v16m-6-6 6 6 6-6" />
+            @break
         @case('descargar')
             <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
             @break

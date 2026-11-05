@@ -9,6 +9,7 @@ use App\Http\Requests\GuardarPreguntaAtsRequest;
 use App\Http\Requests\GuardarUsuarioRequest;
 use App\Http\Requests\IniciarRegistroAtsRequest;
 use App\Http\Requests\IniciarSesionRequest;
+use App\Http\Requests\OrdenarPreguntasAtsRequest;
 use App\Http\Requests\RevisarRegistroAtsRequest;
 use App\Models\User;
 use Database\Seeders\RolesPermisosSeeder;
@@ -32,7 +33,8 @@ it('resuelve los mensajes de cada formulario en español sin depender del idioma
     'filtros de reportes' => [FiltrarReportesRequest::class, ['fecha_hasta' => 'incorrecta'], 'fecha_hasta', 'Selecciona una fecha de fin válida.'],
     'respuestas finales' => [FinalizarRegistroAtsRequest::class, ['respuestas' => [7 => '']], 'respuestas.7', 'Marca Sí o No en todas las preguntas finales.'],
     'máquina' => [GuardarMaquinaRequest::class, ['descripcion' => []], 'descripcion', 'El campo descripción debe ser texto.'],
-    'posición de pregunta' => [GuardarPreguntaAtsRequest::class, ['posicion' => 0], 'posicion', 'La posición debe ser al menos 1.'],
+    'etapa de pregunta' => [GuardarPreguntaAtsRequest::class, ['etapa' => 'Otra'], 'etapa', 'El valor seleccionado para etapa no es válido.'],
+    'orden de preguntas' => [OrdenarPreguntasAtsRequest::class, [], 'orden', 'Selecciona una etapa con preguntas para ordenar.'],
     'correo del usuario' => [GuardarUsuarioRequest::class, ['correo' => 'incorrecto'], 'correo', 'El campo correo electrónico debe ser un correo válido.'],
     'contraseña del usuario' => [GuardarUsuarioRequest::class, [], 'contrasena', 'El campo contraseña es obligatorio.'],
     'respuestas iniciales' => [IniciarRegistroAtsRequest::class, ['respuestas' => [7 => '']], 'respuestas.7', 'Debes responder todas las preguntas iniciales.'],

@@ -18,6 +18,8 @@ Route::middleware('guest')->group(function (): void {
 });
 Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): void {
     Route::get('/panel', PanelController::class)->name('panel');
+    Route::get('/preguntas/orden', [PreguntaAtsController::class, 'orden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden');
+    Route::put('/preguntas/orden', [PreguntaAtsController::class, 'guardarOrden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden.guardar');
     Route::resource('preguntas', PreguntaAtsController::class)->parameters(['preguntas' => 'pregunta'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:preguntas.gestionar');
     Route::get('/registros/create', [RegistroAtsController::class, 'create'])->middleware('can:registros.crear')->name('registros.create');
     Route::post('/registros', [RegistroAtsController::class, 'store'])->middleware('can:registros.crear')->block()->name('registros.store');

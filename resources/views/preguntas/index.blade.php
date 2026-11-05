@@ -8,7 +8,10 @@
             <h1 class="text-2xl font-semibold">Preguntas del ATS</h1>
             <p class="mt-2 text-sm text-neutral-500">Configura las preguntas del formato de tu empresa, su etapa y su orden.</p>
         </div>
-        <a href="{{ route('preguntas.create') }}" class="boton">@include('partials.icono', ['nombre' => 'agregar']) Registrar pregunta</a>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('preguntas.orden') }}" class="boton-secundario gap-2">@include('partials.icono', ['nombre' => 'ordenar']) Orden de preguntas</a>
+            <a href="{{ route('preguntas.create') }}" class="boton">@include('partials.icono', ['nombre' => 'agregar']) Registrar pregunta ATS</a>
+        </div>
     </div>
     <div class="overflow-x-auto rounded-md border border-neutral-200 bg-white">
         <table class="tabla">

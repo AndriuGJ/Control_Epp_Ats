@@ -17,13 +17,7 @@ class GuardarPreguntaAtsRequest extends FormRequest
         return [
             'pregunta' => ['required', 'string', 'max:255'],
             'etapa' => ['required', Rule::in(['Inicial', 'Final'])],
-            'posicion' => ['required', 'integer', 'min:1', 'max:999'],
             'estado' => ['required', 'boolean'],
         ];
-    }
-
-    public function messages(): array
-    {
-        return __('validation.formularios.guardar_pregunta');
     }
 }
