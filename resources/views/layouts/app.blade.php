@@ -20,7 +20,7 @@
                     class="grid size-10 shrink-0 place-items-center rounded-md bg-principal text-sm font-bold text-white">E/A</span>
                 <span class="text-sm font-semibold">
                     Control EPP y ATS
-                    <span class="mt-0.5 block text-xs font-normal text-neutral-500">Logística · Makro</span>
+                    <span class="mt-0.5 block text-xs font-normal text-neutral-500">Logística</span>
                 </span>
             </a>
             <button type="button" data-cerrar-menu aria-label="Cerrar menú"

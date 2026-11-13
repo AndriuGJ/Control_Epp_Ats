@@ -7,7 +7,7 @@
         <div class="mb-7 text-center">
             <p class="text-sm font-semibold text-principal">Control EPP y ATS</p>
             <h1 id="titulo-acceso" class="mt-3 text-2xl font-semibold">Inicia sesión</h1>
-            <p class="mt-2 text-sm text-neutral-500">Logística · Makro</p>
+            <p class="mt-2 text-sm text-neutral-500">Logística</p>
         </div>
 
         @include('partials.mensajes')
