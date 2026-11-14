@@ -44,6 +44,9 @@ return [
         'numbers' => 'La contraseña debe incluir números.',
     ],
     'attributes' => [
+        'intervalo_mantenimiento_horas' => 'intervalo de mantenimiento en horas',
+        'fecha_mantenimiento' => 'fecha de mantenimiento',
+        'observaciones' => 'observaciones',
         'nombres' => 'nombres',
         'apellidos' => 'apellidos',
         'dni' => 'DNI',

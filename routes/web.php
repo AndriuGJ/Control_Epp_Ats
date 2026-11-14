@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CapturaEppController;
+use App\Http\Controllers\MantenimientoController;
 use App\Http\Controllers\MaquinaController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PreguntaAtsController;
@@ -38,6 +39,11 @@ Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): v
     Route::post('/salir', [SesionController::class, 'destroy'])->name('logout');
     Route::get('/reportes', [ReporteController::class, 'index'])->middleware('can:reportes.generar')->name('reportes.index');
     Route::get('/reportes/pdf', [ReporteController::class, 'pdf'])->middleware(['can:reportes.generar', 'throttle:10,1'])->name('reportes.pdf');
+    Route::middleware('can:mantenimientos.gestionar')->group(function (): void {
+        Route::get('/mantenimientos', [MantenimientoController::class, 'index'])->name('mantenimientos.index');
+        Route::get('/mantenimientos/{maquina}', [MantenimientoController::class, 'show'])->name('mantenimientos.show');
+        Route::post('/mantenimientos/{maquina}', [MantenimientoController::class, 'store'])->name('mantenimientos.store');
+    });
     Route::get('/maquinas/{maquina}/fotografia', [MaquinaController::class, 'fotografia'])->middleware('can:maquinas.gestionar')->name('maquinas.fotografia');
     Route::resource('usuarios', UsuarioController::class)->parameters(['usuarios' => 'usuario'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:usuarios.gestionar');
     Route::resource('maquinas', MaquinaController::class)->parameters(['maquinas' => 'maquina'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:maquinas.gestionar');

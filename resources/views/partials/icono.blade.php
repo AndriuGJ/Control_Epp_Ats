@@ -33,6 +33,9 @@
             <circle cx="6" cy="18" r="2" />
             <circle cx="13" cy="18" r="2" />
             @break
+        @case('mantenimiento')
+            <path d="M14.7 6.3a4.5 4.5 0 0 0-5.8 5.8l-5 5a2 2 0 0 0 2.8 2.8l5-5a4.5 4.5 0 0 0 5.8-5.8l-2.8 2.8-2.8-2.8z" />
+            @break
         @case('reportes')
             <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 17v-3M12 17v-5M16 17v-2" />
             @break

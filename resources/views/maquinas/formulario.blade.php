@@ -44,6 +44,14 @@
         </div>
 
         <div>
+            <label class="etiqueta" for="intervalo_mantenimiento_horas">Intervalo de mantenimiento (horas)</label>
+            <input class="campo" type="number" name="intervalo_mantenimiento_horas" id="intervalo_mantenimiento_horas"
+                value="{{ old('intervalo_mantenimiento_horas', $maquina->intervalo_mantenimiento_horas) }}"
+                min="1" max="100000" step="1" placeholder="Ejemplo: 100" aria-describedby="ayuda-intervalo">
+            <p id="ayuda-intervalo" class="mt-2 text-xs text-neutral-500">Déjalo vacío si la máquina aún no tiene un intervalo definido.</p>
+        </div>
+
+        <div>
             <label class="etiqueta" for="estado">Estado</label>
             <select class="campo" name="estado" id="estado">
                 <option value="1" @selected((string) old('estado', (int) $maquina->estado) === '1')>Activa</option>

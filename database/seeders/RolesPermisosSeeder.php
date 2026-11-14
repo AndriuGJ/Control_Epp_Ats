@@ -12,12 +12,12 @@ class RolesPermisosSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $permisos = ['usuarios.gestionar', 'maquinas.gestionar', 'autorizaciones.gestionar', 'preguntas.gestionar', 'registros.crear', 'registros.consultar', 'registros.revisar', 'reportes.generar'];
+        $permisos = ['usuarios.gestionar', 'maquinas.gestionar', 'autorizaciones.gestionar', 'preguntas.gestionar', 'registros.crear', 'registros.consultar', 'registros.revisar', 'reportes.generar', 'mantenimientos.gestionar'];
         foreach ($permisos as $permiso) {
             Permission::findOrCreate($permiso, 'web');
         }
         Role::findOrCreate('administrador', 'web')->syncPermissions($permisos);
-        Role::findOrCreate('supervisor', 'web')->syncPermissions(['registros.consultar', 'registros.revisar', 'reportes.generar']);
+        Role::findOrCreate('supervisor', 'web')->syncPermissions(['registros.consultar', 'registros.revisar', 'reportes.generar', 'mantenimientos.gestionar']);
         Role::findOrCreate('operador', 'web')->syncPermissions(['registros.crear', 'registros.consultar']);
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

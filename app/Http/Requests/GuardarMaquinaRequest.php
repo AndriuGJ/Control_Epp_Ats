@@ -16,6 +16,7 @@ class GuardarMaquinaRequest extends FormRequest
         return [
             'nombre' => ['required', 'string', 'max:100'],
             'descripcion' => ['nullable', 'string', 'max:3000'],
+            'intervalo_mantenimiento_horas' => ['nullable', 'integer', 'min:1', 'max:100000'],
             'estado' => ['required', 'boolean'],
             'fotografia' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];

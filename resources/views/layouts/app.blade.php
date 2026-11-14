@@ -64,6 +64,13 @@
                     <span>Máquinas</span>
                 </a>
             @endcan
+            @can('mantenimientos.gestionar')
+                <a class="enlace-menu {{ request()->routeIs('mantenimientos.*') ? 'enlace-menu-activo' : '' }}"
+                    href="{{ route('mantenimientos.index') }}">
+                    @include('partials.icono', ['nombre' => 'mantenimiento'])
+                    <span>Mantenimiento</span>
+                </a>
+            @endcan
             @can('reportes.generar')
                 <a class="enlace-menu {{ request()->routeIs('reportes.*') ? 'enlace-menu-activo' : '' }}"
                     href="{{ route('reportes.index') }}">

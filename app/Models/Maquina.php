@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['nombre', 'descripcion', 'fotografia', 'estado'])]
+#[Fillable(['nombre', 'descripcion', 'fotografia', 'estado', 'intervalo_mantenimiento_horas'])]
 class Maquina extends Model
 {
     /** @use HasFactory<MaquinaFactory> */
@@ -21,12 +21,17 @@ class Maquina extends Model
 
     protected function casts(): array
     {
-        return ['estado' => 'boolean'];
+        return ['estado' => 'boolean', 'intervalo_mantenimiento_horas' => 'integer'];
     }
 
     public function operadores(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'usuarios_maquinas', 'id_maquina', 'id_usuario')->withTimestamps();
+    }
+
+    public function mantenimientos(): HasMany
+    {
+        return $this->hasMany(Mantenimiento::class, 'id_maquina');
     }
 
     public function registros(): HasMany
