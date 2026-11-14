@@ -10,7 +10,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -19,7 +18,7 @@ use Throwable;
 
 class RegistroAtsService
 {
-    public function __construct(private CapturaEppService $capturas) {}
+    public function __construct(private ValidacionEppService $validaciones) {}
 
     /** @param array{fecha_desde?: ?string, fecha_hasta?: ?string, trabajador?: ?string, id_maquina?: int|string|null, estado?: ?string, revision?: ?string} $filtros */
     public function listar(User $usuario, array $filtros = []): LengthAwarePaginator
@@ -75,7 +74,7 @@ class RegistroAtsService
 
     public function obtener(User $usuario, int $id): RegistroAtsEpp
     {
-        return $this->visiblesPara($usuario)->with(['operador', 'maquina', 'revisor', 'respuestas' => fn (HasMany $respuestas) => $respuestas->with('pregunta')->orderBy('id_respuesta')])->findOrFail($id);
+        return $this->visiblesPara($usuario)->with(['operador', 'maquina', 'revisor', 'validacionEpp.supervisor', 'respuestas' => fn (HasMany $respuestas) => $respuestas->with('pregunta')->orderBy('id_respuesta')])->findOrFail($id);
     }
 
     public function enCurso(User $usuario): ?RegistroAtsEpp
@@ -94,14 +93,14 @@ class RegistroAtsService
         ];
     }
 
-    /** @param array{id_maquina: int, captura_epp: string, firma_inicial: string, respuestas: array<int, string>, version_preguntas: string} $datos */
-    public function iniciar(User $usuario, array $datos, ?array $captura = null): RegistroAtsEpp
+    /** @param array{id_maquina: int, id_validacion_epp: int, firma_inicial: string, respuestas: array<int, string>, version_preguntas: string} $datos */
+    public function iniciar(User $usuario, array $datos): RegistroAtsEpp
     {
         $firma = $this->decodificarFirma($datos['firma_inicial']);
         $archivos = [];
 
         try {
-            return DB::transaction(function () use ($usuario, $datos, $firma, $captura, &$archivos): RegistroAtsEpp {
+            return DB::transaction(function () use ($usuario, $datos, $firma, &$archivos): RegistroAtsEpp {
                 $operador = User::query()->lockForUpdate()->findOrFail($usuario->getKey());
                 abort_unless($operador->estado && $operador->can('registros.crear'), 403);
                 if ($this->enCurso($operador)) {
@@ -112,12 +111,7 @@ class RegistroAtsService
                     throw ValidationException::withMessages(['id_maquina' => 'Selecciona una máquina activa para la que tengas autorización.']);
                 }
                 $preguntas = $this->validarRespuestas('Inicial', $datos);
-                $fotoCapturada = $this->capturas->validar($operador, $captura, $datos['captura_epp']);
-                $fotografia = 'registros/epp/'.basename($fotoCapturada['ruta']);
-                $archivos[] = $fotografia;
-                if (! Storage::disk('local')->copy($fotoCapturada['ruta'], $fotografia)) {
-                    throw ValidationException::withMessages(['captura_epp' => 'No se pudo guardar la captura. Vuelve a intentarlo.']);
-                }
+                $validacion = $this->validaciones->exigirAprobada($operador, (int) $maquina->getKey(), (int) $datos['id_validacion_epp']);
                 $rutaFirma = 'registros/firmas/'.Str::uuid().'.png';
                 $archivos[] = $rutaFirma;
                 if (! Storage::disk('local')->put($rutaFirma, $firma)) {
@@ -126,12 +120,15 @@ class RegistroAtsService
                 $ahora = now();
                 $registro = RegistroAtsEpp::create([
                     'id_operador' => $operador->getKey(), 'id_maquina' => $maquina->getKey(),
-                    'fotografia_epp' => $fotografia, 'fecha_fotografia' => Carbon::parse($fotoCapturada['fecha']),
+                    'id_validacion_epp' => $validacion->getKey(),
+                    'fotografia_epp' => $validacion->fotografia, 'fecha_fotografia' => $validacion->fecha_fotografia,
                     'firma_inicial' => $rutaFirma, 'fecha_inicio' => $ahora, 'estado' => 'En curso',
                 ]);
                 $registro->respuestas()->createMany($preguntas->map(fn (PreguntaAts $pregunta): array => [
                     'id_pregunta' => $pregunta->getKey(), 'respuesta' => trim($datos['respuestas'][$pregunta->getKey()]),
                 ])->all());
+
+                $validacion->update(['usada_en' => $ahora]);
 
                 return $registro;
             });

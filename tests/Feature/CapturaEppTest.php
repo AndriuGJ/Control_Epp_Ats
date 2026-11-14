@@ -4,6 +4,7 @@ use App\Models\Maquina;
 use App\Models\PreguntaAts;
 use App\Models\RegistroAtsEpp;
 use App\Models\User;
+use App\Models\ValidacionEpp;
 use App\Services\CapturaEppService;
 use App\Services\RegistroAtsService;
 use Database\Seeders\RolesPermisosSeeder;
@@ -51,8 +52,13 @@ it('conserva la hora de la captura aunque el ATS se guarde minutos después y co
     $pregunta = PreguntaAts::factory()->create();
     $token = $this->actingAs($operador)->post(route('registros.captura'), ['fotografia' => fotoCapturaEppPrueba()], ['Accept' => 'application/json'])->assertOk()->json('captura');
     $horaCaptura = now()->copy();
+    $this->post(route('validaciones-epp.store'), ['id_maquina' => $maquina->getKey(), 'captura_epp' => $token])->assertSessionHasNoErrors();
+    $validacion = ValidacionEpp::query()->sole();
+    $supervisor = User::factory()->create()->assignRole('supervisor');
+    $this->actingAs($supervisor)->post(route('validaciones-epp.resolver', $validacion), ['decision' => 'aprobar'])->assertSessionHasNoErrors();
+    $this->actingAs($operador);
     $this->travel(5)->minutes();
-    $datos = ['id_maquina' => $maquina->getKey(), 'captura_epp' => $token, 'firma_inicial' => firmaAtsPrueba(), 'respuestas' => [$pregunta->getKey() => 'Sí'], 'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas']];
+    $datos = ['id_maquina' => $maquina->getKey(), 'id_validacion_epp' => $validacion->getKey(), 'firma_inicial' => firmaAtsPrueba(), 'respuestas' => [$pregunta->getKey() => 'Sí'], 'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas']];
     $this->post(route('registros.store'), $datos)->assertSessionHasNoErrors()->assertRedirect();
     $registro = RegistroAtsEpp::query()->sole();
     expect($registro->fecha_fotografia->toDateTimeString())->toBe($horaCaptura->toDateTimeString());
@@ -81,8 +87,9 @@ it('rechaza capturas sin sesión correspondiente de otro usuario o vencidas', fu
     if ($caso === 'vencida') {
         $this->travel(31)->minutes();
     }
-    $datos = ['id_maquina' => $maquina->getKey(), 'captura_epp' => $captura['token'], 'firma_inicial' => firmaAtsPrueba(), 'respuestas' => [$pregunta->getKey() => 'Sí'], 'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas']];
-    $this->actingAs($operador)->post(route('registros.store'), $datos)->assertSessionHasErrors('captura_epp');
+    $datos = ['id_maquina' => $maquina->getKey(), 'captura_epp' => $captura['token']];
+    $this->actingAs($operador)->post(route('validaciones-epp.store'), $datos)->assertSessionHasErrors('captura_epp');
+    $this->assertDatabaseCount('validaciones_epp', 0);
     $this->assertDatabaseCount('registros_ats_epp', 0);
     expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
 })->with(['sin sesión', 'otro usuario', 'vencida']);
@@ -97,7 +104,7 @@ it('no permite adjuntar una imagen directamente al formulario de inicio ni respu
     $pregunta = PreguntaAts::factory()->create();
     $captura = app(CapturaEppService::class)->tomar($operador, fotoCapturaEppPrueba());
     $this->withSession(['ats.captura' => $captura]);
-    $datos = ['id_maquina' => $maquina->getKey(), 'captura_epp' => $captura['token'], 'firma_inicial' => firmaAtsPrueba(), 'fotografia_epp' => fotoCapturaEppPrueba(), 'respuestas' => [$pregunta->getKey() => 'Texto libre'], 'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas']];
+    $datos = ['id_maquina' => $maquina->getKey(), 'id_validacion_epp' => 1, 'firma_inicial' => firmaAtsPrueba(), 'fotografia_epp' => fotoCapturaEppPrueba(), 'respuestas' => [$pregunta->getKey() => 'Texto libre'], 'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas']];
     $this->actingAs($operador)->post(route('registros.store'), $datos)->assertSessionHasErrors(['fotografia_epp', 'respuestas.'.$pregunta->getKey()]);
     $this->assertDatabaseCount('registros_ats_epp', 0);
 });

@@ -64,6 +64,13 @@
                     <span>Máquinas</span>
                 </a>
             @endcan
+            @can('epp.validar')
+                <a class="enlace-menu {{ request()->routeIs('validaciones-epp.*') ? 'enlace-menu-activo' : '' }}"
+                    href="{{ route('validaciones-epp.index') }}">
+                    @include('partials.icono', ['nombre' => 'reportes'])
+                    <span>Validación de EPP</span>
+                </a>
+            @endcan
             @can('mantenimientos.gestionar')
                 <a class="enlace-menu {{ request()->routeIs('mantenimientos.*') ? 'enlace-menu-activo' : '' }}"
                     href="{{ route('mantenimientos.index') }}">

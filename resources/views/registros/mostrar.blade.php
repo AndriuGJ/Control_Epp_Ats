@@ -20,6 +20,10 @@
             <h2 class="mb-4 font-semibold">Fotografía del EPP</h2>
             <figure class="relative"><img class="max-h-96 w-full rounded-md border border-neutral-200 bg-neutral-50 object-contain" src="{{ route('registros.fotografia', $registro) }}" alt="Fotografía del EPP del trabajador"><figcaption class="absolute bottom-2 right-2 rounded-md bg-neutral-950/80 px-3 py-2 text-xs text-white">{{ $registro->fecha_fotografia->format('d/m/Y H:i:s') }} · Perú</figcaption></figure>
             <p class="mt-2 text-xs text-neutral-500">Capturada: {{ $registro->fecha_fotografia->format('d/m/Y H:i') }}</p>
+            @if ($registro->validacionEpp)
+                <p class="mt-2 text-sm text-neutral-600">EPP aprobado por {{ $registro->validacionEpp->supervisor?->nombres }} {{ $registro->validacionEpp->supervisor?->apellidos }}
+                    el {{ $registro->validacionEpp->fecha_revision?->format('d/m/Y H:i:s') }}.</p>
+            @endif
         </section>
         <section class="tarjeta">
             <h2 class="mb-4 font-semibold">Respuestas del ATS</h2>

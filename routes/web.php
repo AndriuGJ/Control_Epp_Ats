@@ -9,6 +9,7 @@ use App\Http\Controllers\RegistroAtsController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\SesionController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ValidacionEppController;
 use App\Http\Middleware\VerificarUsuarioActivo;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,11 @@ Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): v
     Route::get('/preguntas/orden', [PreguntaAtsController::class, 'orden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden');
     Route::put('/preguntas/orden', [PreguntaAtsController::class, 'guardarOrden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden.guardar');
     Route::resource('preguntas', PreguntaAtsController::class)->parameters(['preguntas' => 'pregunta'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:preguntas.gestionar');
+    Route::get('/validaciones-epp', [ValidacionEppController::class, 'index'])->middleware('can:epp.validar')->name('validaciones-epp.index');
+    Route::post('/validaciones-epp', [ValidacionEppController::class, 'store'])->middleware('can:registros.crear')->block()->name('validaciones-epp.store');
+    Route::get('/validaciones-epp/estado', [ValidacionEppController::class, 'estado'])->middleware(['can:registros.crear', 'throttle:30,1'])->name('validaciones-epp.estado');
+    Route::get('/validaciones-epp/{validacion}/fotografia', [ValidacionEppController::class, 'fotografia'])->whereNumber('validacion')->name('validaciones-epp.fotografia');
+    Route::post('/validaciones-epp/{validacion}/resolver', [ValidacionEppController::class, 'resolver'])->whereNumber('validacion')->middleware('can:epp.validar')->name('validaciones-epp.resolver');
     Route::get('/registros/create', [RegistroAtsController::class, 'create'])->middleware('can:registros.crear')->name('registros.create');
     Route::post('/registros', [RegistroAtsController::class, 'store'])->middleware('can:registros.crear')->block()->name('registros.store');
     Route::post('/registros/captura', CapturaEppController::class)->middleware(['can:registros.crear', 'throttle:20,1'])->block()->name('registros.captura');

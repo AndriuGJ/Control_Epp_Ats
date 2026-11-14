@@ -5,6 +5,7 @@ use App\Models\PreguntaAts;
 use App\Models\RegistroAtsEpp;
 use App\Models\RespuestaAts;
 use App\Models\User;
+use App\Models\ValidacionEpp;
 use App\Services\RegistroAtsService;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -171,8 +172,13 @@ it('completa el flujo de cámara inicio y cierre sin reutilizar una captura cons
     $final = PreguntaAts::factory()->create(['etapa' => 'Final']);
     $foto = UploadedFile::fake()->createWithContent('captura.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='));
     $token = $this->actingAs($operador)->post(route('registros.captura'), ['fotografia' => $foto], ['Accept' => 'application/json'])->assertOk()->json('captura');
+    $this->post(route('validaciones-epp.store'), ['id_maquina' => $maquina->getKey(), 'captura_epp' => $token])->assertSessionHasNoErrors();
+    $validacion = ValidacionEpp::query()->sole();
+    $supervisor = User::factory()->create()->assignRole('supervisor');
+    $this->actingAs($supervisor)->post(route('validaciones-epp.resolver', $validacion), ['decision' => 'aprobar'])->assertSessionHasNoErrors();
+    $this->actingAs($operador);
     $version = $this->get(route('registros.create'))->assertOk()->viewData('versionPreguntas');
-    $datosInicio = ['id_maquina' => $maquina->getKey(), 'captura_epp' => $token, 'firma_inicial' => firmaAtsPrueba(), 'respuestas' => [$inicial->getKey() => 'Sí'], 'version_preguntas' => $version];
+    $datosInicio = ['id_maquina' => $maquina->getKey(), 'id_validacion_epp' => $validacion->getKey(), 'firma_inicial' => firmaAtsPrueba(), 'respuestas' => [$inicial->getKey() => 'Sí'], 'version_preguntas' => $version];
     $this->post(route('registros.store'), $datosInicio)->assertSessionHasNoErrors()->assertRedirect();
     $registro = RegistroAtsEpp::query()->sole();
     $this->get(route('registros.show', $registro))->assertOk()->assertSee(route('registros.finalizar', $registro));
@@ -181,7 +187,7 @@ it('completa el flujo de cámara inicio y cierre sin reutilizar una captura cons
     expect($registro->fresh()->estado)->toBe('Finalizado');
     $this->assertDatabaseCount('registros_ats_epp', 1);
     $this->assertDatabaseCount('respuestas_ats', 2);
-    $this->post(route('registros.store'), $datosInicio)->assertSessionHasErrors('captura_epp');
+    $this->post(route('registros.store'), $datosInicio)->assertSessionHasErrors('id_validacion_epp');
     $this->assertDatabaseCount('registros_ats_epp', 1);
 });
 

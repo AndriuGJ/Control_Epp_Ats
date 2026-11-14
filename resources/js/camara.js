@@ -109,7 +109,7 @@ document.querySelectorAll('[data-camara]').forEach((recuadro) => {
             video.hidden = true;
             tomar.hidden = true;
             repetir.hidden = false;
-            estado.textContent = 'Fotografía capturada. Puedes responder el ATS y firmar.';
+            estado.textContent = 'Fotografía capturada. Envíala al supervisor para revisión.';
             detener();
         } catch (excepcion) {
             const mensaje = ['TypeError', 'SyntaxError'].includes(excepcion.name)
@@ -126,7 +126,7 @@ document.querySelectorAll('[data-camara]').forEach((recuadro) => {
     formulario.addEventListener('submit', (evento) => {
         if (!valor.value || procesando) {
             evento.preventDefault();
-            mostrarError('Toma y guarda tu fotografía con la cámara antes de iniciar el registro.');
+            mostrarError('Toma y guarda tu fotografía con la cámara antes de enviarla al supervisor.');
             abrir.focus();
         }
     });

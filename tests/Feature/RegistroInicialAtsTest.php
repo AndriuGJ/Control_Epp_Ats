@@ -4,7 +4,7 @@ use App\Models\Maquina;
 use App\Models\PreguntaAts;
 use App\Models\RegistroAtsEpp;
 use App\Models\User;
-use App\Services\CapturaEppService;
+use App\Models\ValidacionEpp;
 use App\Services\RegistroAtsService;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,12 +28,11 @@ function operadorInicialAts(): User
 
 function datosInicialesAts(User $operador, Maquina $maquina, array $respuestas): array
 {
-    $captura = app(CapturaEppService::class)->tomar($operador, UploadedFile::fake()->createWithContent('epp.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')));
-    test()->withSession(['ats.captura' => $captura]);
+    $validacion = aprobacionEppPrueba($operador, $maquina);
 
     return [
         'id_maquina' => $maquina->getKey(),
-        'captura_epp' => $captura['token'],
+        'id_validacion_epp' => $validacion->getKey(),
         'firma_inicial' => firmaAtsPrueba(),
         'respuestas' => $respuestas,
         'version_preguntas' => app(RegistroAtsService::class)->prepararInicio($operador)['versionPreguntas'],
@@ -63,7 +62,8 @@ it('inicia el registro con la identidad y fecha del servidor y conserva sus arch
     $this->get(route('registros.firma', $registro))->assertOk()->assertHeader('Content-Type', 'image/png');
 });
 
-it('muestra únicamente máquinas autorizadas y preguntas iniciales activas en el formulario', function (): void {
+it('muestra solo máquinas autorizadas y habilita las preguntas iniciales activas tras la aprobación', function (): void {
+    Storage::fake('local');
     $operador = operadorInicialAts();
     $permitida = Maquina::factory()->create(['nombre' => 'Equipo permitido']);
     $inactiva = Maquina::factory()->create(['nombre' => 'Equipo inactivo', 'estado' => false]);
@@ -74,7 +74,15 @@ it('muestra únicamente máquinas autorizadas y preguntas iniciales activas en e
     PreguntaAts::factory()->create(['pregunta' => 'Pregunta desactivada', 'estado' => false]);
     PreguntaAts::factory()->create(['pregunta' => 'Pregunta de cierre', 'etapa' => 'Final']);
 
-    $this->actingAs($operador)->get(route('registros.create'))->assertOk()->assertSee('Equipo permitido')->assertDontSee('Equipo inactivo')->assertDontSee('Equipo de otro operador')->assertSeeInOrder(['Primera pregunta inicial', 'Segunda pregunta inicial'])->assertDontSee('Pregunta desactivada')->assertDontSee('Pregunta de cierre')->assertSee('type="radio"', false)->assertSee('data-camara', false)->assertDontSee('type="file"', false)->assertDontSee('<textarea', false);
+    $this->actingAs($operador)->get(route('registros.create'))
+        ->assertOk()->assertSee('Equipo permitido')->assertDontSee('Equipo inactivo')
+        ->assertDontSee('Equipo de otro operador')->assertSee('data-camara', false)->assertDontSee('type="radio"', false);
+
+    aprobacionEppPrueba($operador, $permitida);
+    $this->get(route('registros.create'))->assertOk()
+        ->assertSeeInOrder(['Primera pregunta inicial', 'Segunda pregunta inicial'])
+        ->assertDontSee('Pregunta desactivada')->assertDontSee('Pregunta de cierre')
+        ->assertSee('type="radio"', false)->assertDontSee('data-camara', false)->assertDontSee('type="file"', false);
 });
 
 it('impide iniciar con una máquina inactiva o sin autorización', function (bool $autorizada, bool $activa): void {
@@ -89,7 +97,8 @@ it('impide iniciar con una máquina inactiva o sin autorización', function (boo
 
     $this->actingAs($operador)->post(route('registros.store'), $datos)->assertSessionHasErrors(['id_maquina' => 'Selecciona una máquina activa para la que tengas autorización.']);
     $this->assertDatabaseCount('registros_ats_epp', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 })->with(['sin autorización' => [false, true], 'autorizada pero inactiva' => [true, false]]);
 
@@ -108,16 +117,17 @@ it('rechaza respuestas incompletas o preguntas agregadas de otra etapa', functio
     $this->actingAs($operador)->post(route('registros.store'), datosInicialesAts($operador, $maquina, $respuestas))->assertSessionHasErrors('respuestas');
     $this->assertDatabaseCount('registros_ats_epp', 0);
     $this->assertDatabaseCount('respuestas_ats', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 })->with(['falta una respuesta' => false, 'incluye pregunta final' => true]);
 
 it('exige fotografía firma y respuestas antes de iniciar', function (): void {
     Storage::fake('local');
     $operador = operadorInicialAts();
-    $this->actingAs($operador)->post(route('registros.store'), [])->assertSessionHasErrors(['id_maquina', 'captura_epp', 'firma_inicial', 'respuestas']);
+    $this->actingAs($operador)->post(route('registros.store'), [])->assertSessionHasErrors(['id_maquina', 'id_validacion_epp', 'firma_inicial', 'respuestas']);
     $this->assertDatabaseCount('registros_ats_epp', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 0);
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 });
 
@@ -131,7 +141,8 @@ it('rechaza firmas inválidas y archivos adjuntos al formulario', function (stri
     $datos[$campo] = $campo === 'firma_inicial' ? 'data:image/png;base64,aG9sYQ==' : UploadedFile::fake()->create('archivo.txt', 1, 'text/plain');
     $this->actingAs($operador)->post(route('registros.store'), $datos)->assertSessionHasErrors($campo)->assertSessionMissing('_old_input.firma_inicial');
     $this->assertDatabaseCount('registros_ats_epp', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 })->with(['firma_inicial', 'fotografia_epp']);
 
@@ -146,7 +157,8 @@ it('evita dos registros en curso del mismo operador incluso con otra máquina', 
     $this->actingAs($operador)->get(route('registros.create'))->assertRedirect(route('registros.show', $registro));
     $this->post(route('registros.store'), datosInicialesAts($operador, $maquina, [$pregunta->getKey() => 'Sí']))->assertSessionHasErrors('registro');
     $this->assertDatabaseCount('registros_ats_epp', 1);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 });
 
@@ -160,7 +172,8 @@ it('rechaza un formulario desactualizado si cambian las preguntas', function ():
     $pregunta->update(['pregunta' => 'Una pregunta distinta']);
     $this->actingAs($operador)->post(route('registros.store'), $datos)->assertSessionHasErrors(['respuestas' => 'Las preguntas cambiaron. Recarga el formulario y responde la versión actual.']);
     $this->assertDatabaseCount('registros_ats_epp', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 });
 
@@ -206,9 +219,10 @@ it('revierte los archivos y datos si falla la creación del registro', function 
     });
 
     $datos = datosInicialesAts($operador, $maquina, [$pregunta->getKey() => 'Sí']);
-    expect(fn () => app(RegistroAtsService::class)->iniciar($operador, $datos, session('ats.captura')))->toThrow(RuntimeException::class);
+    expect(fn () => app(RegistroAtsService::class)->iniciar($operador, $datos))->toThrow(RuntimeException::class);
     $this->assertDatabaseCount('registros_ats_epp', 0);
     $this->assertDatabaseCount('respuestas_ats', 0);
-    expect(Storage::disk('local')->allFiles('registros/epp'))->toBeEmpty();
+    $this->assertDatabaseCount('validaciones_epp', 1);
+    expect(ValidacionEpp::query()->sole()->usada_en)->toBeNull();
     expect(Storage::disk('local')->allFiles('registros/firmas'))->toBeEmpty();
 });

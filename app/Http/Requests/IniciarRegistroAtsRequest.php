@@ -16,7 +16,7 @@ class IniciarRegistroAtsRequest extends FormRequest
     {
         return [
             'id_maquina' => ['required', 'integer'],
-            'captura_epp' => ['required', 'uuid'],
+            'id_validacion_epp' => ['required', 'integer', 'min:1'],
             'fotografia_epp' => ['prohibited'],
             'firma_inicial' => ['required', 'string', 'max:300000'],
             'respuestas' => ['required', 'array', 'min:1', 'max:100'],

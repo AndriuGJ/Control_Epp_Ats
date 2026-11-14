@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'required_if' => 'El campo :attribute es obligatorio.',
     'required' => 'El campo :attribute es obligatorio.',
     'email' => 'El campo :attribute debe ser un correo válido.',
     'unique' => 'El valor de :attribute ya está registrado.',
@@ -61,6 +62,8 @@ return [
         'id_maquina' => 'máquina',
         'fotografia' => 'fotografía',
         'fotografia_epp' => 'fotografía EPP',
+        'motivo_rechazo' => 'motivo de rechazo',
+        'id_validacion_epp' => 'aprobación de EPP',
         'captura_epp' => 'captura EPP',
         'firma_inicial' => 'firma inicial',
         'firma_final' => 'firma final',
@@ -113,8 +116,7 @@ return [
             'respuestas.max' => 'El formulario admite hasta 100 preguntas iniciales.',
             'respuestas.*.required' => 'Debes responder todas las preguntas iniciales.',
             'respuestas.*.in' => 'Selecciona únicamente Sí o No en cada pregunta.',
-            'captura_epp.required' => 'Toma tu fotografía con la cámara antes de iniciar el registro.',
-            'captura_epp.uuid' => 'Vuelve a tomar la fotografía con la cámara.',
+            'id_validacion_epp.required' => 'Necesitas la aprobación previa de EPP para iniciar el ATS.',
             'fotografia_epp.prohibited' => 'Usa la cámara del formulario para tomar la fotografía.',
             'version_preguntas.required' => 'Recarga el formulario antes de iniciar el registro.',
             'version_preguntas.size' => 'Recarga el formulario antes de iniciar el registro.',

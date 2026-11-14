@@ -7,6 +7,7 @@ use App\Models\RespuestaAts;
 use App\Models\User;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -154,7 +155,8 @@ it('aplica el orden guardado al formulario ATS de cada etapa y omite las inactiv
     $admin->assignRole('administrador');
     $operador = User::factory()->create();
     $operador->assignRole('operador');
-    $operador->maquinas()->attach(Maquina::factory()->create());
+    $maquina = Maquina::factory()->create();
+    $operador->maquinas()->attach($maquina);
     $primera = PreguntaAts::factory()->create(['pregunta' => 'Control A', 'etapa' => $etapa, 'posicion' => 1]);
     $segunda = PreguntaAts::factory()->create(['pregunta' => 'Control B', 'etapa' => $etapa, 'posicion' => 2]);
     $inactiva = PreguntaAts::factory()->create(['pregunta' => 'Control inactivo', 'etapa' => $etapa, 'posicion' => 3, 'estado' => false]);
@@ -167,6 +169,9 @@ it('aplica el orden guardado al formulario ATS de cada etapa y omite las inactiv
     if ($etapa === 'Final') {
         $registro = RegistroAtsEpp::factory()->create(['id_operador' => $operador->getKey()]);
         $ruta = route('registros.finalizar', $registro);
+    } else {
+        Storage::fake('local');
+        aprobacionEppPrueba($operador, $maquina);
     }
 
     $this->actingAs($operador)->get($ruta)->assertOk()

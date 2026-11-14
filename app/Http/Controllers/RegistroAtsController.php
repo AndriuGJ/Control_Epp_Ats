@@ -6,8 +6,8 @@ use App\Http\Requests\FiltrarRegistrosAtsRequest;
 use App\Http\Requests\FinalizarRegistroAtsRequest;
 use App\Http\Requests\IniciarRegistroAtsRequest;
 use App\Http\Requests\RevisarRegistroAtsRequest;
-use App\Services\CapturaEppService;
 use App\Services\RegistroAtsService;
+use App\Services\ValidacionEppService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,22 +29,25 @@ class RegistroAtsController extends Controller
         ]);
     }
 
-    public function create(Request $request): View|RedirectResponse
+    public function create(Request $request, ValidacionEppService $validaciones): View|RedirectResponse
     {
         $registro = $this->servicio->enCurso($request->user());
         if ($registro) {
             return to_route('registros.show', $registro)->with('estado', 'Ya tienes un registro en curso.');
         }
 
-        return view('registros.iniciar', $this->servicio->prepararInicio($request->user()));
+        $datos = $this->servicio->prepararInicio($request->user());
+        $validacion = $validaciones->ultima($request->user());
+        if ($validacion && ! $datos['maquinas']->contains((int) $validacion->id_maquina)) {
+            $validacion = null;
+        }
+
+        return view('registros.iniciar', $datos + ['validacion' => $validacion?->load(['maquina', 'supervisor'])]);
     }
 
-    public function store(IniciarRegistroAtsRequest $request, CapturaEppService $capturas): RedirectResponse
+    public function store(IniciarRegistroAtsRequest $request): RedirectResponse
     {
-        $captura = $request->session()->get('ats.captura');
-        $registro = $this->servicio->iniciar($request->user(), $request->validated(), $captura);
-        $request->session()->forget('ats.captura');
-        $capturas->descartar($captura);
+        $registro = $this->servicio->iniciar($request->user(), $request->validated());
 
         return to_route('registros.show', $registro)->with('estado', 'Registro iniciado correctamente.');
     }

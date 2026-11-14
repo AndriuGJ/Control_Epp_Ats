@@ -1,6 +1,7 @@
 import './preguntas';
 import './firma';
 import './camara';
+import './validacion-epp';
 
 const selectorRol = document.querySelector('[data-selector-rol]');
 const autorizaciones = document.querySelector('[data-autorizaciones]');

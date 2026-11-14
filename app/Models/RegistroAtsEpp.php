@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['id_operador', 'id_maquina', 'id_revisor', 'fotografia_epp', 'fecha_fotografia', 'firma_inicial', 'fecha_inicio', 'firma_final', 'fecha_finalizacion', 'estado', 'firma_revisor', 'fecha_revision'])]
+#[Fillable(['id_operador', 'id_maquina', 'id_revisor', 'id_validacion_epp', 'fotografia_epp', 'fecha_fotografia', 'firma_inicial', 'fecha_inicio', 'firma_final', 'fecha_finalizacion', 'estado', 'firma_revisor', 'fecha_revision'])]
 class RegistroAtsEpp extends Model
 {
     /** @use HasFactory<RegistroAtsEppFactory> */
@@ -37,6 +37,11 @@ class RegistroAtsEpp extends Model
     public function maquina(): BelongsTo
     {
         return $this->belongsTo(Maquina::class, 'id_maquina');
+    }
+
+    public function validacionEpp(): BelongsTo
+    {
+        return $this->belongsTo(ValidacionEpp::class, 'id_validacion_epp');
     }
 
     public function respuestas(): HasMany
