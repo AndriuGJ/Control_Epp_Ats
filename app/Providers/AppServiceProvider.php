@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\ConfiguracionService;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View as BladeView;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer(['layouts.app', 'layouts.acceso', 'auth.ingresar', 'reportes.index'], function (BladeView $vista): void {
+            $vista->with('marca', once(fn (): array => app(ConfiguracionService::class)->identidad()));
+        });
     }
 }
