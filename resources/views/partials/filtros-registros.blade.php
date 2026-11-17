@@ -1,4 +1,5 @@
-    {{-- <form method="GET" action="{{ $rutaFiltros }}" class="tarjeta mb-6 space-y-5" aria-label="Buscar registros">
+    @hasanyrole('supervisor|administrador')
+    <form method="GET" action="{{ $rutaFiltros }}" class="tarjeta mb-6 space-y-5" aria-label="Buscar registros">
         <div>
             <h2 class="font-semibold">Buscar registros</h2>
             <p class="mt-1 text-sm text-neutral-500">Puedes combinar los filtros. Las fechas corresponden al inicio de la labor.</p>
@@ -47,4 +48,5 @@
             <button class="boton" type="submit">@include('partials.icono', ['nombre' => 'buscar']) Buscar</button>
             <a class="boton-secundario gap-2" href="{{ $rutaFiltros }}">@include('partials.icono', ['nombre' => 'cerrar']) Limpiar filtros</a>
         </div>
-    </form> --}}
+    </form>
+@endhasanyrole

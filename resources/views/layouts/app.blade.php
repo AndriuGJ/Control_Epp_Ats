@@ -17,8 +17,15 @@
         class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100%-3rem)] overflow-y-auto -translate-x-full flex-col overflow-y-auto border-r border-neutral-200 bg-white p-5 transition-transform motion-reduce:transition-none lg:w-64 lg:translate-x-0 lg:p-7">
         <div class="flex items-center justify-between gap-2">
             <a href="{{ route('panel') }}" class="flex min-w-0 items-center gap-3 text-principal">
-                <span
-                    class="grid size-10 shrink-0 place-items-center rounded-md bg-principal text-sm font-bold text-white">E/A</span>
+                @if ($marca['logo'])
+                    <img src="{{ $marca['logo'] }}" alt="Logo de {{ $marca['empresa'] }}"
+                        class="size-10 shrink-0 rounded-md object-contain">
+                @else
+                    <span
+                        class="grid size-10 shrink-0 place-items-center rounded-md bg-principal text-sm font-bold text-white">
+                        E/A
+                    </span>
+                @endif
                 <span class="text-sm font-semibold">
                     Control EPP y ATS
                     <span class="mt-0.5 block text-xs font-normal text-neutral-500">{{ $marca['empresa'] }}</span>
@@ -134,7 +141,8 @@
             @include('partials.mensajes')
             @yield('contenido')
         </main>
-        <footer class="flex items-center justify-center gap-3 border-t border-neutral-200 px-5 py-4 text-sm text-neutral-600">
+        <footer
+            class="flex items-center justify-center gap-3 border-t border-neutral-200 px-5 py-4 text-sm text-neutral-600">
             @if ($marca['logo'])
                 <img class="h-8 max-w-28 object-contain" src="{{ $marca['logo'] }}" alt="Logo">
             @endif
