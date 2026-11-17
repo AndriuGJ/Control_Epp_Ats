@@ -1,5 +1,8 @@
 <?php
 
+use App\Jobs\EnviarAvisoValidacionEpp;
+use App\Mail\AvisoValidacionEpp;
+use App\Models\Configuracion;
 use App\Models\Maquina;
 use App\Models\PreguntaAts;
 use App\Models\User;
@@ -8,7 +11,9 @@ use App\Services\RegistroAtsService;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Testing\Fakes\MailFake;
 
 uses(RefreshDatabase::class);
 
@@ -104,7 +109,89 @@ it('protege la foto y no permite que una persona apruebe su propia validación',
     $this->actingAs($operador)->post($resolver, ['decision' => 'aprobar'])->assertForbidden();
     $this->actingAs($supervisor)->get($foto)->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
 
-    $this->travel(30)->minutes();
+    $this->travel(10)->minutes();
     $this->post($resolver, ['decision' => 'aprobar'])->assertSessionHasErrors('decision');
     expect($validacion->fresh()->id_supervisor)->toBeNull();
 });
+
+it('avisa a los revisores activos al enviar y a los cinco minutos, y deja reenviar al vencer', function (): void {
+    $correo = new MailFake(app('mail.manager'));
+    Mail::shouldReceive('build')->twice()->andReturn($correo);
+    $operador = User::factory()->create()->assignRole(['operador', 'supervisor']);
+    $supervisor = User::factory()->create()->assignRole(['supervisor', 'administrador']);
+    $administrador = User::factory()->create()->assignRole('administrador');
+    $inactivo = User::factory()->create(['estado' => false])->assignRole('supervisor');
+    $otroOperador = User::factory()->create()->assignRole('operador');
+    $maquina = Maquina::factory()->create();
+    $operador->maquinas()->attach($maquina);
+    PreguntaAts::factory()->create();
+    Configuracion::query()->findOrFail(1)->update([
+        'avisos_epp' => true, 'usuario_smtp' => 'avisos@example.com', 'contrasena_smtp' => 'clave-de-prueba',
+    ]);
+    config(['queue.default' => 'sync']);
+
+    $capturar = fn (): string => $this->actingAs($operador)
+        ->postJson(route('registros.captura'), ['fotografia' => UploadedFile::fake()->image('captura.jpg')])
+        ->assertOk()->json('captura');
+    $enviar = fn (string $token) => $this->post(route('validaciones-epp.store'), [
+        'id_maquina' => $maquina->getKey(),
+        'captura_epp' => $token,
+    ])->assertRedirect(route('registros.create'))->assertSessionHasNoErrors();
+    $procesarCola = fn () => $this->artisan('queue:work database --queue=epp --once')->assertSuccessful();
+
+    $token = $capturar();
+    $fechaCaptura = now();
+    $this->travel(2)->minutes();
+    $fechaEnvio = now();
+    $enviar($token);
+    $validacion = ValidacionEpp::query()->firstOrFail();
+
+    expect($validacion->fecha_fotografia->equalTo($fechaCaptura))->toBeTrue()
+        ->and($validacion->vence_en->equalTo($fechaEnvio->copy()->addMinutes(10)))->toBeTrue();
+    $procesarCola();
+    $correo->assertSent(AvisoValidacionEpp::class, fn (AvisoValidacionEpp $aviso): bool => ! $aviso->recordatorio
+        && $aviso->hasBcc($supervisor->correo) && $aviso->hasBcc($administrador->correo)
+        && ! $aviso->hasBcc($inactivo->correo) && ! $aviso->hasBcc($otroOperador->correo)
+        && ! $aviso->hasBcc($operador->correo) && count($aviso->bcc) === 2
+        && $aviso->validacion->is($validacion));
+
+    $this->travelTo($fechaEnvio->copy()->addMinutes(4));
+    $procesarCola();
+    $correo->assertSentCount(1);
+    $this->travelTo($fechaEnvio->copy()->addMinutes(5));
+    $procesarCola();
+    $correo->assertSent(AvisoValidacionEpp::class, fn (AvisoValidacionEpp $aviso): bool => $aviso->recordatorio
+        && $aviso->hasBcc($supervisor->correo) && $aviso->hasBcc($administrador->correo));
+    $correo->assertSentCount(2);
+
+    $this->travelTo($fechaEnvio->copy()->addMinutes(10));
+    $this->getJson(route('validaciones-epp.estado'))->assertExactJson(['estado' => 'Vencida']);
+    $this->get(route('registros.create'))->assertOk()->assertSee('Coordina con el supervisor');
+    $this->actingAs($supervisor)->post(route('validaciones-epp.resolver', $validacion), ['decision' => 'aprobar'])
+        ->assertSessionHasErrors('decision');
+    $enviar($capturar());
+    $this->assertDatabaseCount('validaciones_epp', 2);
+    Storage::disk('local')->assertExists($validacion->fotografia);
+});
+
+it('omite el recordatorio si ya no procede', function (string $caso): void {
+    Mail::shouldReceive('build')->never();
+    $supervisor = User::factory()->create()->assignRole('supervisor');
+    $validacion = ValidacionEpp::factory()->create();
+    $configuracion = Configuracion::query()->findOrFail(1);
+    $configuracion->update([
+        'avisos_epp' => true, 'usuario_smtp' => 'avisos@example.com', 'contrasena_smtp' => 'clave-de-prueba',
+    ]);
+    $this->travel(5)->minutes();
+
+    match ($caso) {
+        'aprobada' => $validacion->update(['estado' => ValidacionEpp::APROBADA]),
+        'rechazada' => $validacion->update(['estado' => ValidacionEpp::RECHAZADA]),
+        'vencida' => $this->travel(5)->minutes(),
+        'supervisor inactivo' => $supervisor->update(['estado' => false]),
+        'avisos desactivados' => $configuracion->update(['avisos_epp' => false]),
+        'destinatario sin permisos' => $supervisor->removeRole('supervisor'),
+    };
+
+    app()->call([(new EnviarAvisoValidacionEpp($validacion->getKey(), recordatorio: true)), 'handle']);
+})->with(['aprobada', 'rechazada', 'vencida', 'supervisor inactivo', 'destinatario sin permisos', 'avisos desactivados']);

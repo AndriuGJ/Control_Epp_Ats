@@ -18,6 +18,9 @@
             <circle cx="10.5" cy="10.5" r="6.5" />
             <path d="m16 16 5 5" />
             @break
+        @case('configuracion')
+            <path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-6 2v4" />
+            @break
         @case('panel')
             <rect x="3" y="3" width="7" height="7" rx="1" />
             <rect x="14" y="3" width="7" height="7" rx="1" />

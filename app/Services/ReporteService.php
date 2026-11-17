@@ -12,7 +12,7 @@ class ReporteService
 {
     public const int MAXIMO_REGISTROS = 1000;
 
-    public function __construct(private RegistroAtsService $registros) {}
+    public function __construct(private RegistroAtsService $registros, private ConfiguracionService $configuracion) {}
 
     public function preparar(User $usuario, array $filtros = []): array
     {
@@ -45,9 +45,11 @@ class ReporteService
         $opciones->setChroot(base_path('vendor/dompdf/dompdf/lib/fonts'));
         $pdf = new Dompdf($opciones);
         $maquina = empty($filtros['id_maquina']) ? null : $this->registros->maquinasParaConsulta($usuario)->firstWhere('id_maquina', $filtros['id_maquina']);
+        $empresa = $this->configuracion->actual();
         $pdf->loadHtml(view('reportes.pdf', [
             'registros' => $registros, 'filtros' => $filtros, 'maquina' => $maquina, 'fotografias' => $fotografias,
             'generadoPor' => $usuario, 'fechaGeneracion' => now(),
+            'empresa' => $empresa->nombre_empresa, 'area' => $empresa->area, 'logo' => $this->configuracion->logoParaPdf($empresa),
         ])->render(), 'UTF-8');
         $pdf->setPaper('A4', 'landscape');
         $pdf->render();

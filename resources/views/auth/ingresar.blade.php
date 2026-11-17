@@ -5,9 +5,12 @@
 @section('contenido')
     <section class="tarjeta w-full max-w-sm sm:p-8" aria-labelledby="titulo-acceso">
         <div class="mb-7 text-center">
-            <p class="text-sm font-semibold text-principal">Control EPP y ATS</p>
+            @if ($marca['logo'])
+                <img class="mx-auto mb-3 h-14 max-w-44 object-contain" src="{{ $marca['logo'] }}" alt="Logo de {{ $marca['empresa'] }}">
+            @endif
+            <p class="text-sm font-semibold text-principal">{{ $marca['empresa'] }}</p>
             <h1 id="titulo-acceso" class="mt-3 text-2xl font-semibold">Inicia sesión</h1>
-            <p class="mt-2 text-sm text-neutral-500">Logística</p>
+            <p class="mt-2 text-sm text-neutral-500">{{ $marca['area'] }}</p>
         </div>
 
         @include('partials.mensajes')

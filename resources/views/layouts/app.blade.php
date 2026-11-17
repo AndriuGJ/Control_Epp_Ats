@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('titulo', 'Panel de control') · {{ config('app.name') }}</title>
+    <title>@yield('titulo', 'Panel de control') · {{ $marca['empresa'] }}</title>
+    <link rel="icon" href="{{ $marca['logo'] ?? asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -13,14 +14,14 @@
         class="fixed inset-0 z-40 cursor-pointer bg-neutral-950/50 lg:hidden" aria-label="Cerrar menú"></button>
 
     <aside id="menu-lateral" aria-label="Menú principal"
-        class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100%-3rem)] -translate-x-full flex-col overflow-y-auto border-r border-neutral-200 bg-white p-5 transition-transform motion-reduce:transition-none lg:w-64 lg:translate-x-0 lg:p-7">
+        class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100%-3rem)] overflow-y-auto -translate-x-full flex-col overflow-y-auto border-r border-neutral-200 bg-white p-5 transition-transform motion-reduce:transition-none lg:w-64 lg:translate-x-0 lg:p-7">
         <div class="flex items-center justify-between gap-2">
             <a href="{{ route('panel') }}" class="flex min-w-0 items-center gap-3 text-principal">
                 <span
                     class="grid size-10 shrink-0 place-items-center rounded-md bg-principal text-sm font-bold text-white">E/A</span>
                 <span class="text-sm font-semibold">
                     Control EPP y ATS
-                    <span class="mt-0.5 block text-xs font-normal text-neutral-500">Logística</span>
+                    <span class="mt-0.5 block text-xs font-normal text-neutral-500">{{ $marca['empresa'] }}</span>
                 </span>
             </a>
             <button type="button" data-cerrar-menu aria-label="Cerrar menú"
@@ -85,6 +86,13 @@
                     <span>Reportes</span>
                 </a>
             @endcan
+            @role('administrador')
+                <a class="enlace-menu {{ request()->routeIs('configuracion.*') ? 'enlace-menu-activo' : '' }}"
+                    href="{{ route('configuracion.edit') }}">
+                    @include('partials.icono', ['nombre' => 'configuracion'])
+                    <span>Configuración</span>
+                </a>
+            @endrole
         </nav>
         <p class="mt-auto pt-8 text-xs leading-5 text-neutral-500">
             Registro individual.<br>Información organizada.
@@ -126,6 +134,12 @@
             @include('partials.mensajes')
             @yield('contenido')
         </main>
+        <footer class="flex items-center justify-center gap-3 border-t border-neutral-200 px-5 py-4 text-sm text-neutral-600">
+            @if ($marca['logo'])
+                <img class="h-8 max-w-28 object-contain" src="{{ $marca['logo'] }}" alt="Logo">
+            @endif
+            <span>{{ $marca['empresa'] }} · {{ $marca['area'] }}</span>
+        </footer>
     </div>
 </body>
 

@@ -20,7 +20,7 @@ class ValidacionEppFactory extends Factory
             'fotografia' => 'registros/epp/'.Str::uuid().'.png',
             'fecha_fotografia' => now(),
             'estado' => ValidacionEpp::PENDIENTE,
-            'vence_en' => now()->addMinutes(30),
+            'vence_en' => now()->addMinutes(config('epp.minutos_revision')),
         ];
     }
 

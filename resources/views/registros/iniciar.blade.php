@@ -34,15 +34,17 @@
                 <img class="max-h-64 w-full rounded-md border border-neutral-200 object-contain"
                     src="{{ route('validaciones-epp.fotografia', $validacion) }}" alt="Evidencia de EPP enviada para revisión">
                 @if ($estadoEpp === 'Pendiente')
-                    <p class="text-sm">Espera la revisión del supervisor. El ATS inicial se habilitará si aprueba la foto.</p>
+                    <p class="text-sm">Espera la revisión del supervisor hasta las {{ $validacion->vence_en->format('H:i:s') }}. El ATS inicial se habilitará si aprueba la foto.</p>
                     <a class="boton-secundario" href="{{ route('registros.create') }}">Actualizar estado</a>
                 @elseif ($estadoEpp === 'Aprobada')
                     <p class="text-sm">Aprobada por {{ $validacion->supervisor->nombres }} {{ $validacion->supervisor->apellidos }}. Inicia el ATS antes de las {{ $validacion->vence_en->format('H:i:s') }}.</p>
                 @elseif ($estadoEpp === 'Rechazada')
                     <p class="text-sm"><strong>Motivo:</strong> {{ $validacion->motivo_rechazo }}</p>
                     <p class="text-sm">Corrige lo indicado y envía otra foto.</p>
+                @elseif ($validacion->estado === \App\Models\ValidacionEpp::PENDIENTE)
+                    <p class="text-sm">Venció el plazo de revisión del EPP. Coordina con el supervisor y vuelve a tomar y enviar una foto.</p>
                 @else
-                    <p class="text-sm">La validación venció. Toma y envía una nueva foto.</p>
+                    <p class="text-sm">La aprobación venció antes de iniciar el ATS. Toma y envía una nueva foto.</p>
                 @endif
             </section>
         @endif

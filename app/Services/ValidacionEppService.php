@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Jobs\EnviarAvisoValidacionEpp;
 use App\Models\RegistroAtsEpp;
 use App\Models\User;
 use App\Models\ValidacionEpp;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +15,7 @@ use Throwable;
 
 class ValidacionEppService
 {
-    public function __construct(private CapturaEppService $capturas) {}
+    public function __construct(private CapturaEppService $capturas, private ConfiguracionService $configuracion) {}
 
     public function ultima(User $operador): ?ValidacionEpp
     {
@@ -25,7 +27,7 @@ class ValidacionEppService
         $ruta = null;
 
         try {
-            return DB::transaction(function () use ($usuario, $idMaquina, $captura, $token, &$ruta): ValidacionEpp {
+            $validacion = DB::transaction(function () use ($usuario, $idMaquina, $captura, $token, &$ruta): ValidacionEpp {
                 $operador = User::query()->lockForUpdate()->findOrFail($usuario->getKey());
                 abort_unless($operador->estado && $operador->can('registros.crear'), 403);
                 if (RegistroAtsEpp::query()->where('id_operador', $operador->getKey())->where('estado', 'En curso')->exists()) {
@@ -60,7 +62,7 @@ class ValidacionEppService
                     'fotografia' => $ruta,
                     'fecha_fotografia' => $fechaFoto,
                     'estado' => ValidacionEpp::PENDIENTE,
-                    'vence_en' => $fechaFoto->copy()->addMinutes(config('epp.minutos_revision')),
+                    'vence_en' => now()->addMinutes(config('epp.minutos_revision')),
                 ]);
             });
         } catch (Throwable $excepcion) {
@@ -69,6 +71,16 @@ class ValidacionEppService
             }
             throw $excepcion;
         }
+
+        if ($this->configuracion->actual()->avisos_epp) {
+            rescue(fn () => Bus::dispatch((new EnviarAvisoValidacionEpp($validacion->getKey()))
+                ->onConnection('database')->onQueue('epp')->afterCommit()));
+            rescue(fn () => Bus::dispatch((new EnviarAvisoValidacionEpp($validacion->getKey(), recordatorio: true))
+                ->onConnection('database')->onQueue('epp')->afterCommit()
+                ->delay($validacion->created_at->copy()->addMinutes(config('epp.minutos_recordatorio')))));
+        }
+
+        return $validacion;
     }
 
     public function resolver(ValidacionEpp $validacion, User $supervisor, string $decision, ?string $motivo): void

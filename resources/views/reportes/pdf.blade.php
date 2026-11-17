@@ -6,6 +6,7 @@
     <style>
         @page { margin: 30px 28px 45px; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 9px; color: #292d2f; }
+        .logo { max-width: 145px; max-height: 56px; margin-bottom: 8px; }
         h1 { margin: 0 0 5px; font-size: 19px; }
         .subtitulo { margin: 0 0 15px; color: #666; font-size: 11px; }
         .datos { margin-bottom: 12px; line-height: 1.7; }
@@ -24,8 +25,11 @@
     </style>
 </head>
 <body>
+    @if ($logo)
+        <img class="logo" src="{{ $logo }}" alt="Logo de {{ $empresa }}">
+    @endif
     <h1>Reporte de registros ATS y EPP</h1>
-    <p class="subtitulo">Logística</p>
+    <p class="subtitulo">{{ $empresa }} · {{ $area }}</p>
     <div class="datos">
         <strong>Generado por:</strong> {{ $generadoPor->nombres }} {{ $generadoPor->apellidos }}<br>
         <strong>Fecha de emisión:</strong> {{ $fechaGeneracion->format('d/m/Y H:i:s') }} (Perú)<br>

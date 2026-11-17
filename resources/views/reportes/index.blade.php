@@ -4,9 +4,14 @@
 
 @section('contenido')
     <div class="mb-7 flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-semibold">Reportes ATS/EPP</h1>
-            <p class="mt-2 text-sm text-neutral-500">Consulta los registros y sus fotografías del EPP. El PDF se abrirá en otra pestaña.</p>
+        <div class="flex items-center gap-4">
+            @if ($marca['logo'])
+                <img class="h-12 max-w-32 object-contain" src="{{ $marca['logo'] }}" alt="Logo">
+            @endif
+            <div>
+                <h1 class="text-2xl font-semibold">Reportes ATS/EPP</h1>
+                <p class="mt-2 text-sm text-neutral-500">{{ $marca['empresa'] }} · {{ $marca['area'] }}. Consulta los registros y sus fotografías del EPP.</p>
+            </div>
         </div>
         <a class="boton" href="{{ route('reportes.pdf', $filtros) }}" target="_blank" rel="noopener noreferrer" title="Abrir PDF en otra pestaña">@include('partials.icono', ['nombre' => 'descargar']) Descargar PDF</a>
     </div>

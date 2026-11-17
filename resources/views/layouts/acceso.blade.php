@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('titulo', 'Ingresar') · {{ config('app.name') }}</title>
+    <title>@yield('titulo', 'Ingresar') · {{ $marca['empresa'] }}</title>
+    <link rel="icon" href="{{ $marca['logo'] ?? asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>

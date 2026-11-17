@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CapturaEppController;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\MantenimientoController;
 use App\Http\Controllers\MaquinaController;
 use App\Http\Controllers\PanelController;
@@ -14,12 +15,17 @@ use App\Http\Middleware\VerificarUsuarioActivo;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/panel');
+Route::get('/marca/logo', [ConfiguracionController::class, 'logo'])->name('marca.logo');
 Route::middleware('guest')->group(function (): void {
     Route::get('/ingresar', [SesionController::class, 'create'])->name('login');
     Route::post('/ingresar', [SesionController::class, 'store'])->name('sesion.store');
 });
 Route::middleware(['auth', VerificarUsuarioActivo::class])->group(function (): void {
     Route::get('/panel', PanelController::class)->name('panel');
+    Route::middleware('role:administrador')->group(function (): void {
+        Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('configuracion.edit');
+        Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('configuracion.update');
+    });
     Route::get('/preguntas/orden', [PreguntaAtsController::class, 'orden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden');
     Route::put('/preguntas/orden', [PreguntaAtsController::class, 'guardarOrden'])->middleware('can:preguntas.gestionar')->name('preguntas.orden.guardar');
     Route::resource('preguntas', PreguntaAtsController::class)->parameters(['preguntas' => 'pregunta'])->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:preguntas.gestionar');

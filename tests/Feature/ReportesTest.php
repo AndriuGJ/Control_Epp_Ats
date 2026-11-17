@@ -121,8 +121,9 @@ it('escapa textos de usuarios y filtros en la plantilla PDF', function (): void 
     $html = view('reportes.pdf', [
         'registros' => collect(), 'filtros' => ['trabajador' => '<script>alert(1)</script>'],
         'maquina' => null, 'generadoPor' => $supervisor, 'fechaGeneracion' => now(),
+        'empresa' => '<b>Macro</b>', 'area' => 'Logística', 'logo' => null,
     ])->render();
-    expect($html)->toContain('&lt;script&gt;alert(1)&lt;/script&gt;')->not->toContain('<script>alert(1)</script>');
+    expect($html)->toContain('&lt;script&gt;alert(1)&lt;/script&gt;', '&lt;b&gt;Macro&lt;/b&gt;')->not->toContain('<script>alert(1)</script>');
 });
 
 it('permite descargar exactamente el máximo de registros sin recortar el listado', function (): void {
