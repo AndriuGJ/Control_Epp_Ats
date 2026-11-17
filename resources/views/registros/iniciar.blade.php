@@ -7,7 +7,8 @@
         <a class="inline-flex items-center gap-2 text-sm text-principal hover:underline"
             href="{{ route('registros.index') }}">@include('partials.icono', ['nombre' => 'volver']) Volver a registros</a>
         <h1 class="mt-4 text-2xl font-semibold">Iniciar registro ATS/EPP</h1>
-        <p class="mt-2 text-sm text-neutral-500">Envía una foto con tu EPP. Cuando el supervisor la apruebe, podrás completar y firmar el ATS inicial.</p>
+        <p class="mt-2 text-sm text-neutral-500">Envía una foto con tu EPP. Cuando el supervisor la apruebe, podrás completar
+            y firmar el ATS inicial.</p>
     </div>
 
     @if ($maquinas->isEmpty() || $preguntas->isEmpty())
@@ -26,23 +27,29 @@
 
         @if ($estadoEpp && $estadoEpp !== 'Utilizada')
             <section class="tarjeta mb-6 max-w-3xl space-y-4"
-                @if ($estadoEpp === 'Pendiente')
-                    data-estado-epp="{{ $estadoEpp }}" data-url-estado-epp="{{ route('validaciones-epp.estado') }}"
-                @endif>
+                @if ($estadoEpp === 'Pendiente') data-estado-epp="{{ $estadoEpp }}" data-url-estado-epp="{{ route('validaciones-epp.estado') }}" @endif>
                 <h2 class="font-semibold">Validación de EPP: {{ $estadoEpp }}</h2>
-                <p class="text-sm text-neutral-600">{{ $validacion->maquina->nombre }} · Foto del {{ $validacion->fecha_fotografia->format('d/m/Y H:i:s') }}</p>
+                <p class="text-sm text-neutral-600">{{ $validacion->maquina->nombre }} · Foto del
+                    {{ $validacion->fecha_fotografia->format('d/m/Y H:i:s') }}</p>
                 <img class="max-h-64 w-full rounded-md border border-neutral-200 object-contain"
-                    src="{{ route('validaciones-epp.fotografia', $validacion) }}" alt="Evidencia de EPP enviada para revisión">
+                    src="{{ route('validaciones-epp.fotografia', $validacion) }}"
+                    alt="Evidencia de EPP enviada para revisión">
                 @if ($estadoEpp === 'Pendiente')
-                    <p class="text-sm">Espera la revisión del supervisor hasta las {{ $validacion->vence_en->format('H:i:s') }}. El ATS inicial se habilitará si aprueba la foto.</p>
+                    <p class="text-sm">Espera la revisión del supervisor hasta las
+                        {{ $validacion->vence_en->format('H:i:s') }}. El ATS inicial se habilitará si aprueba la foto.</p>
                     <a class="boton-secundario" href="{{ route('registros.create') }}">Actualizar estado</a>
                 @elseif ($estadoEpp === 'Aprobada')
-                    <p class="text-sm">Aprobada por {{ $validacion->supervisor->nombres }} {{ $validacion->supervisor->apellidos }}. Inicia el ATS antes de las {{ $validacion->vence_en->format('H:i:s') }}.</p>
+                    <p class="text-sm">Aprobada por {{ $validacion->supervisor->nombres }}
+                        {{ $validacion->supervisor->apellidos }}. Inicia el ATS antes de las
+                        {{ $validacion->vence_en->format('H:i:s') }}.</p>
                 @elseif ($estadoEpp === 'Rechazada')
-                    <p class="text-sm"><strong>Motivo:</strong> {{ $validacion->motivo_rechazo }}</p>
-                    <p class="text-sm">Corrige lo indicado y envía otra foto.</p>
+                    <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        <p><strong>Motivo del rechazo:</strong> {{ $validacion->motivo_rechazo }}</p>
+                        <p class="mt-1">Corrige lo indicado y envía otra foto.</p>
+                    </div>
                 @elseif ($validacion->estado === \App\Models\ValidacionEpp::PENDIENTE)
-                    <p class="text-sm">Venció el plazo de revisión del EPP. Coordina con el supervisor y vuelve a tomar y enviar una foto.</p>
+                    <p class="text-sm">Venció el plazo de revisión del EPP. Coordina con el supervisor y vuelve a tomar y
+                        enviar una foto.</p>
                 @else
                     <p class="text-sm">La aprobación venció antes de iniciar el ATS. Toma y envía una nueva foto.</p>
                 @endif
@@ -78,7 +85,8 @@
                         <select class="campo" id="id_maquina" name="id_maquina" required>
                             <option value="">Selecciona una máquina</option>
                             @foreach ($maquinas as $maquina)
-                                <option value="{{ $maquina->getKey() }}" @selected((string) old('id_maquina') === (string) $maquina->getKey())>{{ $maquina->nombre }}
+                                <option value="{{ $maquina->getKey() }}" @selected((string) old('id_maquina') === (string) $maquina->getKey())>
+                                    {{ $maquina->nombre }}
                                 </option>
                             @endforeach
                         </select>
